@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <sys/types.h>
 
+// TODO: properly support repeated orange characters
+
 // can be easily passed
 typedef struct {
 	uint data[5];

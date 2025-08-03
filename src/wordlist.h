@@ -57,4 +57,12 @@ void printWords(const Wordlist words) {
 	printf("\n");
 }
 
+// returns a copy of the wordlist, allocating memory by itself
+Wordlist copyWordlist(const Wordlist initial) {
+	Pattern* copied = calloc(initial.count, sizeof(Pattern));
+	memcpy(copied, initial.data, initial.count * sizeof(Pattern));
+	Wordlist out = {initial.count, copied};
+	return out;
+}
+
 #endif /* WORDLIST_H */
