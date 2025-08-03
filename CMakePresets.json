@@ -1,0 +1,66 @@
+{
+	"version": 1,
+	"cmakeMinimumRequired": {
+		"major": 3,
+		"minor": 29,
+		"patch": 0
+	},
+	"configurePresets": [
+		{
+			"name": "default",
+			"displayName": "Default",
+			"description": "Default config. Should NOT be used directly.",
+			"hidden": true,
+			"generator": "Unix Makefiles",
+			"binaryDir": "${sourceDir}/build",
+			"cacheVariables": {
+				"MY_COMPILE_OPTS": "-Wall -Wextra -Wundef -Wswitch-enum -Wmissing-field-initializers $env{CXX_ISERROR} $env{CXX_SANITIZE} $env{CXX_OPTIMIZATION} $env{CXX_DEBUG} $env{CXX_PROFILE}"
+			}
+		},
+		{
+			"name": "rel",
+			"displayName": "Release",
+			"description": "For release builds",
+			"inherits": "default",
+			"warnings": {
+				"dev": false
+			},
+			"environment": {
+				"CXX_OPTIMIZATION": "-O2",
+				"CXX_ISERROR": "-Werror"
+			}
+		},
+		{
+			"name": "dev",
+			"displayName": "Development",
+			"description": "Anything for development should eventually inherit from this.",
+			"inherits": "default",
+			"environment": {
+				"CXX_SANITIZE": "-fsanitize=address -fsanitize=undefined -fsanitize=null -fsanitize=return -fsanitize=signed-integer-overflow -fsanitize=bounds -fsanitize=integer-divide-by-zero -fsanitize=unreachable -fsanitize=shift-base -fsanitize=shift-exponent",
+				"CXX_OPTIMIZATION": "-O0",
+				"CXX_DEBUG": "-g"
+			}
+		},
+		{
+			"name": "gdb",
+			"displayName": "GNU Debugger Mode",
+			"description": "For use with gdb.",
+			"inherits": "dev",
+			"environment": {
+				"CXX_OPTIMIZATION": "-Og",
+				"CXX_DEBUG": "-ggdb",
+				"CXX_SANITIZE": "-fsanitize=undefined -fsanitize=null -fsanitize=return -fsanitize=signed-integer-overflow -fsanitize=bounds"
+			}
+		},
+		{
+			"name": "gprof",
+			"displayName": "gprof",
+			"description": "For use with the GNU Profiler.",
+			"inherits": "dev",
+			"environment": {
+				"CXX_DEBUG": "-g",
+				"CXX_PROFILE": "-pg"
+			}
+		}
+	]
+}
