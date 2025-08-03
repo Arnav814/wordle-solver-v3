@@ -1,6 +1,7 @@
 #include <stdio.h>
+#include "wordlist.h"
 
 int main() {
-	printf("Hello, World!");
+	loadWordlist();
 }
 
