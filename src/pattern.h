@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <sys/types.h>
+#include <limits.h>
 
 // TODO: properly support repeated orange characters
 
@@ -10,6 +11,9 @@
 typedef struct {
 	uint data[5];
 } Pattern;
+
+// filters anything
+#define ANY_LETTER UINT_MAX
 
 // Stores characters as an int, where all letters have a corresponding bit.
 // This way, words and patterns have the same representation, composing
