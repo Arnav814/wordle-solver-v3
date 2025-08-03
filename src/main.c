@@ -2,6 +2,7 @@
 #include "wordlist.h"
 
 int main() {
-	loadWordlist();
+	Wordlist words = loadWordlist();
+	printWords(words);
 }
 

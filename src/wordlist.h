@@ -10,8 +10,9 @@ typedef struct {
 	Pattern* data;
 } Wordlist;
 
+// allocates memory automatically
 Wordlist loadWordlist() {
-	FILE* file = fopen("../wordlists/wordlist.txt", "r");
+	FILE* file = fopen("../wordlists/short.txt", "r");
 	char line[7]; // include the newline char
 
 	uint initialLineCount = 64; // how many words to initially allocate for
@@ -26,14 +27,11 @@ Wordlist loadWordlist() {
 		lineCount++;
 
 		if (lineCount >= bufElems) { // reallocate if necessary
-			printf("\nreallocated\n");
 			bufElems *= 2; // growth factor of 2
-			lineBuf = realloc(lineBuf, bufElems * 5);
+			lineBuf = reallocarray(lineBuf, bufElems, 5);
 		}
 
-		printf(".");
-		fflush(stdout);
-		memcpy(line, lineBuf + lineCount * 5, 5);
+		memcpy(lineBuf + (lineCount - 1) * 5, &line, 5);
 	}
 
 	// convert to the correct format
@@ -45,8 +43,18 @@ Wordlist loadWordlist() {
 	}
 
 	free(lineBuf);
-	printf("Read %i lines, buffer size %i.\n", lineCount, bufElems);
+	// printf("Read %i lines, buffer size %i.\n", lineCount, bufElems);
 	return words;
+}
+
+void printWords(const Wordlist words) {
+	char word[6];
+	word[5] = 0; // add null terminator
+	for (uint i = 0; i < words.count; i++) {
+		pattern2str(words.data[i], word);
+		printf("%s,", word);
+	}
+	printf("\n");
 }
 
 #endif /* WORDLIST_H */
