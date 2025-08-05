@@ -1,5 +1,6 @@
 #ifndef ALGORITHM_H
 #define ALGORITHM_H
+#include <progressbar/progressbar.h>
 #include "pattern.h"
 #include "wordlist.h"
 #include "userio.h"
@@ -97,20 +98,30 @@ ulong cumulativeWordsLeft(const Pattern guess, const Wordlist solutions) {
 
 // find the best word to guess, where allWords is the full wordlist and
 // solutions is all possible solutions
+// also displays a progress bar
 Pattern findBestWord(const Wordlist allWords, const Wordlist solutions) {
 	assert(allWords.count > 0);
 	assert(solutions.count > 0);
+
 	Pattern bestWord;
 	ulong lowestScore = ULONG_MAX;
+	char label[100];
+	progressbar* progress = progressbar_new("", allWords.count);
 
 	for (uint guessIdx = 0; guessIdx < allWords.count; guessIdx++) {
+		sprintf(label, "Processing %i/%i", guessIdx+1, allWords.count);
+		progressbar_update_label(progress, label);
+
 		ulong score = cumulativeWordsLeft(allWords.data[guessIdx], solutions);
 		if (score < lowestScore) {
 			bestWord = allWords.data[guessIdx];
 			lowestScore = score;
 		}
+
+		progressbar_inc(progress);
 	}
 
+	progressbar_finish(progress);
 	return bestWord;
 }
 
