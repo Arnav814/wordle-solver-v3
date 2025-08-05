@@ -58,6 +58,8 @@ char letter2char(const uint letter) {
 		case 0b10000000000000000000000000: return 'z';
 		default: assert(false);
 	}
+
+	return ' '; // unreachable, but silences warning
 }
 
 // provided string may or may not be null terminated, but must be >= 5 chars

@@ -2,6 +2,7 @@
 #define ALGORITHM_H
 #include "pattern.h"
 #include "wordlist.h"
+#include "userio.h"
 
 // returns a copy of the provided wordlist containing all words that match pattern
 Wordlist filter(const Pattern pattern, const Wordlist words) {
@@ -30,6 +31,68 @@ uint countFilter(const Pattern pattern, const Wordlist words) {
 		}
 	}
 	return matching;
+}
+
+// simulate the result of guessing `guess`, provided `solution` is the solution
+Pattern simGuess(const Pattern guess, Pattern solution) {
+	Pattern guessCopy = guess; // need to keep the original guess around
+
+	// contains the [gyn] result data, see userio.h for more
+	char result[5] = {'n', 'n', 'n', 'n', 'n'};
+
+	// see https://www.reddit.com/r/wordle/comments/ry49ne/illustration_of_what_happens_when_your_guess_has/
+	// for more info about the intracacies of this code when dealing with repeated letters
+
+	// pass for greens
+	for (uint i = 0; i < 5; i++) {
+		if (solution.data[i] == guessCopy.data[i]) {
+			result[i] = 'g';
+			// don't double count
+			guessCopy.data[i] = 0;
+			solution.data[i] = 0;
+		}
+	}
+
+	// pass for yellows
+	for (uint i = 0; i < 5; i++) {
+		for (uint k = 0; k < 5; k++) {
+			if (guessCopy.data[i] == solution.data[k] && guessCopy.data[i] && solution.data[k]) {
+				result[i] = 'y';
+				// don't double count
+				guessCopy.data[i] = 0;
+				solution.data[k] = 0;
+			}
+		}
+	}
+
+	// char resStr[6];
+	// resStr[5] = 0;
+	// memcpy(resStr, result, 5);
+	// printf("%s", resStr);
+
+	return parsePattern(guess, result);
+}
+
+// for every possible solution, pretend to guess `guess`, then count how many
+// possible solutions are left and sum the result
+ulong cumulativeWordsLeft(const Pattern guess, const Wordlist solutions) {
+	ulong total = 0;
+	for (uint solutionIdx = 0; solutionIdx < solutions.count; solutionIdx++) {
+		Pattern pattern = simGuess(guess, solutions.data[solutionIdx]);
+		uint filteredCount = countFilter(pattern, solutions);
+		total += filteredCount;
+		
+		// char guessStr[6];
+		// guessStr[5] = 0;
+		// pattern2str(solutions.data[solutionIdx], guessStr);
+		// printf("### Adding %i for %s\n", filteredCount, guessStr);
+
+		// Wordlist actualWords = filter(pattern, solutions);
+		// printWords(actualWords);
+		// free(actualWords.data);
+	}
+
+	return total;
 }
 
 #endif /* ALGORITHM_H */

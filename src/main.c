@@ -6,11 +6,10 @@ int main() {
 	Wordlist words = loadWordlist();
 
 	printWords(words);
-	Pattern supplied = readPattern(str2pattern("about"));
-	Wordlist filtered = filter(supplied, words);
-	printWords(filtered);
+
+	ulong cwl = cumulativeWordsLeft(str2pattern("about"), words);
+	printf("cumulativeWordsLeft: %lu\n", cwl);
 
 	free(words.data);
-	free(filtered.data);
 }
 
