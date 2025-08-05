@@ -95,4 +95,23 @@ ulong cumulativeWordsLeft(const Pattern guess, const Wordlist solutions) {
 	return total;
 }
 
+// find the best word to guess, where allWords is the full wordlist and
+// solutions is all possible solutions
+Pattern findBestWord(const Wordlist allWords, const Wordlist solutions) {
+	assert(allWords.count > 0);
+	assert(solutions.count > 0);
+	Pattern bestWord;
+	ulong lowestScore = ULONG_MAX;
+
+	for (uint guessIdx = 0; guessIdx < allWords.count; guessIdx++) {
+		ulong score = cumulativeWordsLeft(allWords.data[guessIdx], solutions);
+		if (score < lowestScore) {
+			bestWord = allWords.data[guessIdx];
+			lowestScore = score;
+		}
+	}
+
+	return bestWord;
+}
+
 #endif /* ALGORITHM_H */

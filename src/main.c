@@ -5,10 +5,11 @@
 int main() {
 	Wordlist words = loadWordlist();
 
-	printWords(words);
-
-	ulong cwl = cumulativeWordsLeft(str2pattern("about"), words);
-	printf("cumulativeWordsLeft: %lu\n", cwl);
+	Pattern guess = findBestWord(words, words);
+	char wordStr[6];
+	wordStr[5] = 0;
+	pattern2str(guess, wordStr);
+	printf("Best guess: %s.\n", wordStr);
 
 	free(words.data);
 }
