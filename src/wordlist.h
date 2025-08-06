@@ -12,7 +12,7 @@ typedef struct {
 
 // allocates memory automatically
 Wordlist loadWordlist() {
-	FILE* file = fopen("../wordlists/short.txt", "r");
+	FILE* file = fopen("../wordlists/wordlist.txt", "r");
 	char line[7]; // include the newline char
 
 	uint initialLineCount = 64; // how many words to initially allocate for

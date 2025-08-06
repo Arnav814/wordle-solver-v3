@@ -16,21 +16,28 @@ Pattern parsePattern(const Pattern word, const char* const text) {
 		assert(text[i] == 'g' || text[i] == 'y' || text[i] == 'n');
 	}
 
-	Pattern out = {ANY_LETTER, ANY_LETTER, ANY_LETTER, ANY_LETTER, ANY_LETTER};
-	for (uint i = 0; i < 5; i++) {
-		if (text[i] == 'g')
-			out.data[i] = word.data[i]; // must be exact
-		else if (text[i] == 'y')
-			out.data[i] = ~word.data[i]; // anything but the letter, TODO: handle better
-	}
-
-	// have to check after, to remove from the entire pattern
-	for (uint i = 0; i < 5; i++) {
+	Pattern out = ANYTHING;
+	// have to check before, to remove from the entire pattern without affecting duplicates
+	// Duplicates that are in the guess but not the word will have the first
+	// instance be yellow, and any subsequent instances be gray. Don't remove those.
+	for (int i = 5; i >= 0; i--) {
 		if (text[i] == 'n') {
 			for (uint k = 0; k < 5; k++) {
 				out.data[k] &= ~word.data[i]; // remove word[i] from the entire pattern
 			}
+		} else if (text[i] == 'y') {
+			for (uint k = 0; k < 5; k++) {
+				out.data[k] |= word.data[i]; // add word[i] back, in case we removed it
+			}
 		}
+	}
+
+	for (uint i = 0; i < 5; i++) {
+		if (text[i] == 'g')
+			out.data[i] = word.data[i]; // must be exact
+		else if (text[i] == 'y')
+			// anything but the letter, TODO: handle better
+			out.data[i] &= ~word.data[i];
 	}
 
 	return out;

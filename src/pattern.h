@@ -2,6 +2,7 @@
 #define PATTERN_H
 #include <assert.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <sys/types.h>
 #include <limits.h>
 
@@ -13,7 +14,8 @@ typedef struct {
 } Pattern;
 
 // filters anything
-#define ANY_LETTER UINT_MAX
+#define ANY_LETTER 0b11111111111111111111111111
+#define ANYTHING {ANY_LETTER, ANY_LETTER, ANY_LETTER, ANY_LETTER, ANY_LETTER}
 
 // Stores characters as an int, where all letters have a corresponding bit.
 // This way, words and patterns have the same representation, composing
@@ -78,11 +80,25 @@ void pattern2str(const Pattern pattern, char* res) {
 	}
 }
 
-// populates provided buffer res with the output
-void composePatterns(const Pattern a, const Pattern b, Pattern res) {
-	for (uint i = 0; i < 5; i++) {
-		res.data[i] = a.data[i] & b.data[i];
+// for debugging
+void printPattern(const Pattern pattern) {
+	for (uint letterIdx = 0; letterIdx < 5; letterIdx++) {
+		for (int bitIdx = sizeof(uint) * CHAR_BIT - 1; bitIdx >= 0; bitIdx--) {
+			printf("%i", (pattern.data[letterIdx] >> bitIdx) & 1);
+		}
+		printf(",");
 	}
+	printf("\n");
+}
+
+// returns the output
+Pattern composePatterns(const Pattern a, const Pattern b) {
+	Pattern out;
+	for (uint i = 0; i < 5; i++) {
+		out.data[i] = a.data[i] & b.data[i];
+	}
+
+	return out;
 }
 
 // check that word matches pattern
