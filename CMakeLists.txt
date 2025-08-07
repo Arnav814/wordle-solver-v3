@@ -26,7 +26,6 @@ target_link_libraries(progressbar PUBLIC ${CURSES_LIBRARIES})
 
 add_executable(prog)
 include("src/filelist.cmake")
-target_compile_options(prog PRIVATE "-march=native")
 target_compile_features(prog PRIVATE cxx_std_23)
 target_compile_features(prog PRIVATE c_std_23)
 target_link_libraries(prog progressbar)

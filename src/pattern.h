@@ -5,13 +5,11 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <limits.h>
-#include <smmintrin.h>
 
 // TODO: properly support repeated orange characters
 
 // can be easily passed
 typedef struct {
-	alignas(16)
 	uint data[5];
 } Pattern;
 
@@ -93,14 +91,6 @@ void printPattern(const Pattern pattern) {
 	printf("\n");
 }
 
-Pattern inversePattern(const Pattern pattern) {
-	Pattern out;
-	for (uint i = 0; i < 5; i++) {
-		out.data[i] = ~pattern.data[i];
-	}
-	return out;
-}
-
 // returns the output
 Pattern composePatterns(const Pattern a, const Pattern b) {
 	Pattern out;
@@ -111,21 +101,13 @@ Pattern composePatterns(const Pattern a, const Pattern b) {
 	return out;
 }
 
-// slower than checkPatternSimd, but easier to use
+// check that word matches pattern
 bool checkPattern(const Pattern pattern, const Pattern word) {
 	for (uint i = 0; i < 5; i++) {
 		if ((pattern.data[i] & word.data[i]) == 0)
 			return false;
 	}
 	return true;
-}
-
-// check that word matches pattern, takes an inversed pattern that should be bitwise negated first
-inline bool checkPatternSimd(const __m128i invPattern, const uint lastUint, const Pattern word) {
-	// the result of parsing the first four uints
-	int first4 = _mm_test_all_zeros(invPattern, *(__m128i*)word.data);
-	if (first4 == 0) return false; // if any uint evaluated to 0
-	else return (lastUint & word.data[4]) == 0; // check the last uint
 }
 
 #endif /* PATTERN_H */
