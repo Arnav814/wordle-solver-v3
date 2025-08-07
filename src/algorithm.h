@@ -25,9 +25,12 @@ Wordlist filter(const Pattern pattern, const Wordlist words) {
 
 // count how many words from words pass pattern, but don't actually create the output
 uint countFilter(const Pattern pattern, const Wordlist words) {
+	Pattern invPattern = inversePattern(pattern); // for checkPattern
+	__m128i asReg = *(__m128i*)pattern.data;
+
 	uint matching = 0;
 	for (uint i = 0; i < words.count; i++) {
-		if (checkPattern(pattern, words.data[i])) {
+		if (checkPatternSimd(asReg, invPattern.data[4], words.data[i])) {
 			matching++;
 		}
 	}
