@@ -37,6 +37,7 @@ find_package(OpenCL)
 
 add_executable(prog)
 include("src/filelist.cmake")
+target_compile_options(prog PRIVATE "-march=native") # makes things faster, if less portable
 target_compile_features(prog PRIVATE cxx_std_23)
 target_compile_features(prog PRIVATE c_std_23)
 target_link_libraries(prog progressbar)
