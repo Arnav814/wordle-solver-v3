@@ -1,6 +1,8 @@
 #include "wordlist.h"
 #include "algorithm.h"
 #include "userio.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 int main() {
 	Wordlist words = loadWordlist();
