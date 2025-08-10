@@ -79,12 +79,10 @@ ulong cumulativeWordsLeft(const Pattern guess, const Wordlist solutions) {
 		uint filteredCount = countFilter(pattern, solutions);
 		total += filteredCount;
 		
-		char guessStr[6];
-		guessStr[5] = 0;
-		pattern2str(solutions.data[solutionIdx], guessStr);
-		printf("### Adding %i for %s pattern ", filteredCount, guessStr);
-		printPattern(pattern);
-		printf("\n");
+		// char guessStr[6];
+		// guessStr[5] = 0;
+		// pattern2str(solutions.data[solutionIdx], guessStr);
+		// printf("### Adding %i for %s\n", filteredCount, guessStr);
 
 		// Wordlist actualWords = filter(pattern, solutions);
 		// printWords(actualWords);
@@ -107,11 +105,6 @@ Pattern findBestWord(const Wordlist allWords, const Wordlist solutions) {
 		sprintf(label, "Processing %i/%i", guessIdx+1, allWords.count);
 		progressbar_update_label(progress, label);
 
-		char guessStr[6];
-		guessStr[5] = 0;
-		pattern2str(allWords.data[guessIdx], guessStr);
-
-		printf("# WORD: %s\n", guessStr);
 		ulong score = cumulativeWordsLeft(allWords.data[guessIdx], solutions);
 		if (score < lowestScore) {
 			bestWord = allWords.data[guessIdx];
