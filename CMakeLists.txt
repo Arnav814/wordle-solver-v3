@@ -25,6 +25,15 @@ CPMAddPackage(
 target_link_libraries(progressbar PUBLIC ${CURSES_LIBRARIES})
 
 CPMAddPackage(
+	NAME c_hashmap
+	GITHUB_REPOSITORY Mashpoe/c-hashmap
+	GIT_TAG 98bbfe006640a411a9d8c949a46a712edbbbf891
+	VERSION 1.1 # again, a placeholder version
+)
+# has no cmakelists, so we have to do it ourselves
+add_library(c_hashmap ${c_hashmap_SOURCE_DIR}/map.c)
+
+CPMAddPackage(
 	NAME OpenCL_Headers
 	GITHUB_REPOSITORY KhronosGroup/OpenCL-Headers
 	GIT_TAG v2025.07.22
@@ -41,7 +50,10 @@ target_compile_options(prog PRIVATE "-march=native") # makes things faster, if l
 target_compile_features(prog PRIVATE cxx_std_23)
 target_compile_features(prog PRIVATE c_std_23)
 target_link_libraries(prog progressbar)
+target_link_libraries(prog c_hashmap)
 target_include_directories(prog PRIVATE ${progressbar_SOURCE_DIR}/include)
+# also has other files, but is the least messy solution
+target_include_directories(prog PRIVATE ${c_hashmap_SOURCE_DIR})
 
 if (DEFINED MY_COMPILE_OPTS) # defined by CMakePresets.json sometimes
 	separate_arguments(MY_CXX_FLAGS UNIX_COMMAND ${MY_COMPILE_OPTS})
