@@ -3,6 +3,7 @@
 #include <limits.h>
 #include <progressbar/progressbar.h>
 #include <assert.h>
+#include <map.h>
 
 Wordlist filter(const Pattern pattern, const Wordlist words) {
   // allocate space assuming all words pass; probably too much space, but who
@@ -73,11 +74,22 @@ Pattern simGuess(const Pattern guess, Pattern solution) {
 }
 
 ulong cumulativeWordsLeft(const Pattern guess, const Wordlist solutions) {
+	hashmap* map = hashmap_create();
 	ulong total = 0;
+
 	for (uint solutionIdx = 0; solutionIdx < solutions.count; solutionIdx++) {
 		Pattern pattern = simGuess(guess, solutions.data[solutionIdx]);
-		uint filteredCount = countFilter(pattern, solutions);
-		total += filteredCount;
+
+		uintptr_t cachedCount = 0;
+		uint count = 0;
+		if (hashmap_get(map, hashmap_static_arr(pattern.data), &cachedCount)) {
+			count = cachedCount;
+		} else {
+			count = countFilter(pattern, solutions);
+			hashmap_set(map, hashmap_static_arr(pattern.data), count);
+		}
+
+		total += count;
 		
 		// char guessStr[6];
 		// guessStr[5] = 0;
@@ -89,6 +101,7 @@ ulong cumulativeWordsLeft(const Pattern guess, const Wordlist solutions) {
 		// free(actualWords.data);
 	}
 
+	hashmap_free(map);
 	return total;
 }
 

@@ -16,7 +16,7 @@ int main() {
 		// printf("\n");
 
 		Pattern guess;
-		if (iteration == 0) guess = str2pattern("alert"); // first word is really slow
+		if (iteration == 0) guess = str2pattern("lares"); // first word is really slow
 		else guess = findBestWord(words, solutions);
 		Pattern update = readPattern(guess);
 		// printf("upd:");
