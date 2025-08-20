@@ -24,7 +24,6 @@ Wordlist filter(const Pattern pattern, const Wordlist words) {
   return out;
 }
 
-[[clang::noinline]]
 uint countFilter(const Pattern pattern, const Wordlist words) {
 	uint matching = 0;
 	for (uint i = 0; i < words.count; i++) {
@@ -35,7 +34,6 @@ uint countFilter(const Pattern pattern, const Wordlist words) {
 	return matching;
 }
 
-[[clang::noinline]]
 Pattern simGuess(const Pattern guess, Pattern solution) {
 	Pattern guessCopy = guess; // need to keep the original guess around
 
@@ -75,7 +73,8 @@ Pattern simGuess(const Pattern guess, Pattern solution) {
 	return parsePattern(guess, result);
 }
 
-ulong cumulativeWordsLeft(const Pattern guess, const Wordlist solutions, hashmap* const cache) {
+ulong cumulativeWordsLeft(const Pattern guess, const Wordlist solutions) {
+	hashmap* map = hashmap_create();
 	ulong total = 0;
 
 	for (uint solutionIdx = 0; solutionIdx < solutions.count; solutionIdx++) {
@@ -83,15 +82,11 @@ ulong cumulativeWordsLeft(const Pattern guess, const Wordlist solutions, hashmap
 
 		uintptr_t cachedCount = 0;
 		uint count = 0;
-		if (hashmap_get(cache, hashmap_static_arr(pattern.data), &cachedCount)) {
+		if (hashmap_get(map, hashmap_static_arr(pattern.data), &cachedCount)) {
 			count = cachedCount;
 		} else {
 			count = countFilter(pattern, solutions);
-
-			Pattern* copied = (Pattern*)malloc(sizeof(Pattern)); // freed after the cache is used
-			memcpy(copied->data, pattern.data, sizeof(pattern.data));
-
-			hashmap_set(cache, hashmap_static_arr(copied->data), count);
+			hashmap_set(map, hashmap_static_arr(pattern.data), count);
 		}
 
 		total += count;
@@ -106,13 +101,8 @@ ulong cumulativeWordsLeft(const Pattern guess, const Wordlist solutions, hashmap
 		// free(actualWords.data);
 	}
 
+	hashmap_free(map);
 	return total;
-}
-
-int freeCachedKeys(const void* key, [[maybe_unused]] size_t ksize,
-		 [[maybe_unused]] uintptr_t value, [[maybe_unused]] void* usr) {
-	free((void*) key); // cast isn't a problem because the hashmap is immediately freed
-	return 0; // success
 }
 
 Pattern findBestWord(const Wordlist allWords, const Wordlist solutions) {
@@ -123,13 +113,12 @@ Pattern findBestWord(const Wordlist allWords, const Wordlist solutions) {
 	ulong lowestScore = ULONG_MAX;
 	char label[100];
 	progressbar* progress = progressbar_new("", allWords.count);
-	hashmap* countCache = hashmap_create();
 
 	for (uint guessIdx = 0; guessIdx < allWords.count; guessIdx++) {
 		sprintf(label, "Processing %i/%i", guessIdx+1, allWords.count);
 		progressbar_update_label(progress, label);
 
-		ulong score = cumulativeWordsLeft(allWords.data[guessIdx], solutions, countCache);
+		ulong score = cumulativeWordsLeft(allWords.data[guessIdx], solutions);
 		if (score < lowestScore) {
 			bestWord = allWords.data[guessIdx];
 			lowestScore = score;
@@ -139,8 +128,6 @@ Pattern findBestWord(const Wordlist allWords, const Wordlist solutions) {
 	}
 
 	progressbar_finish(progress);
-	hashmap_iterate(countCache, freeCachedKeys, NULL);
-	hashmap_free(countCache);
 	return bestWord;
 }
 
