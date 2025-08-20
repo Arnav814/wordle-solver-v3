@@ -33,17 +33,6 @@ CPMAddPackage(
 # has no cmakelists, so we have to do it ourselves
 add_library(c_hashmap ${c_hashmap_SOURCE_DIR}/map.c)
 
-CPMAddPackage(
-	NAME OpenCL_Headers
-	GITHUB_REPOSITORY KhronosGroup/OpenCL-Headers
-	GIT_TAG v2025.07.22
-)
-
-# from https://github.com/bashbaug/SimpleOpenCLSamples/
-# requires ocl-icd-opencl-dev on Ubuntu
-set(OpenCL_INCLUDE_DIR ${OpenCL_Headers_SOURCE_DIR})
-find_package(OpenCL)
-
 add_executable(prog)
 include("src/filelist.cmake")
 target_compile_options(prog PRIVATE "-march=native") # makes things faster, if less portable
