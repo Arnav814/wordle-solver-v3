@@ -6,7 +6,14 @@
 
 int main() {
 	Wordlist words = loadWordlist();
+
+	findBestWord(words, words);
+
+	free(words.data);
+	return 0;
+
 	Wordlist solutions = copyWordlist(words);
+
 	Pattern knownInfo = ANYTHING;
 
 	uint iteration = 0;

@@ -5,7 +5,7 @@
 #include <assert.h>
 
 Wordlist loadWordlist() {
-	FILE* file = fopen("../wordlists/wordlist.txt", "r");
+	FILE* file = fopen("../wordlists/medium.txt", "r");
 	char line[7]; // include the newline char
 
 	uint initialLineCount = 64; // how many words to initially allocate for

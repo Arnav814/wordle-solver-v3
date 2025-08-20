@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 int char2letter(const char c) {
-	assert(('a' <= c) && (c <= 'z'));
+	assert(('a' <= c) && (c <= 'z')); // TODO: handle properly
 	return 1 << (c - 'a');
 }
 

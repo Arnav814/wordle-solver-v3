@@ -1,5 +1,6 @@
 #ifndef ALGORITHM_H
 #define ALGORITHM_H
+#include "map.h"
 #include "pattern.h"
 #include "wordlist.h"
 
@@ -13,8 +14,9 @@ uint countFilter(const Pattern pattern, const Wordlist words);
 Pattern simGuess(const Pattern guess, Pattern solution);
 
 // for every possible solution, pretend to guess `guess`, then count how many
-// possible solutions are left and sum the result
-ulong cumulativeWordsLeft(const Pattern guess, const Wordlist solutions);
+// possible solutions are left and sum the result; takes in a hashmap to cache patterns counted,
+// modifies the cache, needs keys to be freed later
+ulong cumulativeWordsLeft(const Pattern guess, const Wordlist solutions, hashmap* const cache);
 
 // find the best word to guess, where allWords is the full wordlist and
 // solutions is all possible solutions
