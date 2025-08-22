@@ -173,7 +173,7 @@ BestWord threadedFindWord(const Wordlist allWords, const Wordlist solutions, uin
 		// 		searchSpace.words.data, alreadyProcessed, processUntil);
 		pthread_create(&threads[i], NULL, findBestWordWrapper, &searchSpaces[i]);
 
-		alreadyProcessed = processUntil;
+		alreadyProcessed = processUntil + 1; // don't reprocess the last word
 	}
 
 	// get the results from the threads
