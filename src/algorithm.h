@@ -16,9 +16,17 @@ Pattern simGuess(const Pattern guess, Pattern solution);
 // possible solutions are left and sum the result
 ulong cumulativeWordsLeft(const Pattern guess, const Wordlist solutions);
 
+// contains the word and its score
+typedef struct {
+	Pattern word;
+	ulong score;
+} BestWord;
+
 // find the best word to guess, where allWords is the full wordlist and
 // solutions is all possible solutions
 // also displays a progress bar
-Pattern findBestWord(const Wordlist allWords, const Wordlist solutions);
+BestWord findBestWord(const Wordlist allWords, const Wordlist solutions);
+
+BestWord threadedFindWord(const Wordlist allWords, const Wordlist solutions, const uint threadCount);
 
 #endif /* ALGORITHM_H */

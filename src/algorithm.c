@@ -1,6 +1,7 @@
 #include "algorithm.h"
 #include "userio.h"
 #include <limits.h>
+#include <pthread.h>
 #include <progressbar/progressbar.h>
 #include <assert.h>
 #include <map.h>
@@ -105,18 +106,18 @@ ulong cumulativeWordsLeft(const Pattern guess, const Wordlist solutions) {
 	return total;
 }
 
-Pattern findBestWord(const Wordlist allWords, const Wordlist solutions) {
+BestWord findBestWord(const Wordlist allWords, const Wordlist solutions) {
 	assert(allWords.count > 0);
 	assert(solutions.count > 0);
 
 	Pattern bestWord;
 	ulong lowestScore = ULONG_MAX;
-	char label[100];
-	progressbar* progress = progressbar_new("", allWords.count);
+	// char label[100];
+	// progressbar* progress = progressbar_new("", allWords.count);
 
 	for (uint guessIdx = 0; guessIdx < allWords.count; guessIdx++) {
-		sprintf(label, "Processing %i/%i", guessIdx+1, allWords.count);
-		progressbar_update_label(progress, label);
+		// sprintf(label, "Processing %i/%i", guessIdx+1, allWords.count);
+		// progressbar_update_label(progress, label);
 
 		ulong score = cumulativeWordsLeft(allWords.data[guessIdx], solutions);
 		if (score < lowestScore) {
@@ -124,10 +125,76 @@ Pattern findBestWord(const Wordlist allWords, const Wordlist solutions) {
 			lowestScore = score;
 		}
 
-		progressbar_inc(progress);
+		// progressbar_inc(progress);
 	}
 
-	progressbar_finish(progress);
+	// progressbar_finish(progress);
+	BestWord asStruct = {bestWord, lowestScore};
+	return asStruct;
+}
+
+// for multithreading
+typedef struct {
+	Wordlist words;
+	Wordlist solutions;
+} WordsSolutions;
+
+// can only use one argument for threads, has to return void*
+void* findBestWordWrapper(void* arg) {
+	WordsSolutions* casted = (WordsSolutions*) arg;
+	BestWord bestWord = findBestWord(casted->words, casted->solutions);
+	BestWord* asPtr = (BestWord*)calloc(1, sizeof(BestWord)); // have to return a void*
+	memcpy(asPtr, &bestWord, sizeof(BestWord));
+	return asPtr;
+};
+
+BestWord threadedFindWord(const Wordlist allWords, const Wordlist solutions, uint threadCount) {
+	assert(allWords.count > 0);
+	assert(solutions.count > 0);
+
+	// don't spawn more threads than there are words
+	if (allWords.count < threadCount)
+		threadCount = allWords.count;
+
+	pthread_t* threads = calloc(threadCount, sizeof(pthread_t));
+	WordsSolutions* searchSpaces = calloc(threadCount, sizeof(WordsSolutions));
+
+	// create the threads
+	uint alreadyProcessed = 0; // count the words we've already made threads for
+	for (uint i = 0; i < threadCount; i++) {
+		// Where to process until.
+		// Instead of count * (i/threads), use (count*i) / threads to avoid floats.
+		uint processUntil = ((ulong) allWords.count * (i + 1)) / threadCount;
+		Wordlist thisSection = {processUntil - alreadyProcessed, &allWords.data[alreadyProcessed]};
+
+		WordsSolutions searchSpace = {thisSection, solutions};
+		searchSpaces[i] = searchSpace; // keep the data after this loop iteration
+		// printf("Spawning thread for %i words @ %p. From %i to %i.\n", searchSpace.words.count,
+		// 		searchSpace.words.data, alreadyProcessed, processUntil);
+		pthread_create(&threads[i], NULL, findBestWordWrapper, &searchSpaces[i]);
+
+		alreadyProcessed = processUntil;
+	}
+
+	// get the results from the threads
+	BestWord bestWord = {ANYTHING, ULONG_MAX};
+	for (uint i = 0; i < threadCount; i++) {
+		BestWord* fromThread = NULL;
+		pthread_join(threads[i], (void**) &fromThread);
+
+		// char asStr[6];
+		// asStr[5] = 0;
+		// pattern2str(fromThread->word, asStr);
+		// printf("Thread says: %s, %lu.\n", asStr, fromThread->score);
+
+		// keep the best word
+		if (fromThread->score < bestWord.score)
+			bestWord = *fromThread;
+		free(fromThread);
+	}
+
+	free(threads);
+	free(searchSpaces);
 	return bestWord;
 }
 

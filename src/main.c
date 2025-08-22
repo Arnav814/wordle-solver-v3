@@ -17,7 +17,7 @@ int main() {
 
 		Pattern guess;
 		if (iteration == 0) guess = str2pattern("lares"); // first word is really slow
-		else guess = findBestWord(words, solutions);
+		else guess = threadedFindWord(words, solutions, 4).word;
 		Pattern update = readPattern(guess);
 		// printf("upd:");
 		// printPattern(update);
