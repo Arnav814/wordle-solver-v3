@@ -6,6 +6,7 @@
 #include <assert.h>
 #include <map.h>
 #include <stdatomic.h>
+#include <time.h>
 
 Wordlist filter(const Pattern pattern, const Wordlist words) {
   // allocate space assuming all words pass; probably too much space, but who
@@ -161,6 +162,9 @@ void displayProgress(const atomic_uint* const completed, const uint total) {
 		progressbar_update(progress, tempCompleted);
 		// make sure the last iteration is drawn, so we end with a full progressbar no matter what
 		keepGoing = tempCompleted < total;
+		
+		struct timespec pollInterval = {0, 100000000}; // 100 milliseconds
+		nanosleep(&pollInterval, NULL);
 	}
 
 	progressbar_finish(progress);
