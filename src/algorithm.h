@@ -22,11 +22,6 @@ typedef struct {
 	ulong score;
 } BestWord;
 
-// find the best word to guess, where allWords is the full wordlist and
-// solutions is all possible solutions
-// also displays a progress bar
-BestWord findBestWord(const Wordlist allWords, const Wordlist solutions);
-
 BestWord threadedFindWord(const Wordlist allWords, const Wordlist solutions, const uint threadCount);
 
 #endif /* ALGORITHM_H */

@@ -5,6 +5,7 @@
 #include <progressbar/progressbar.h>
 #include <assert.h>
 #include <map.h>
+#include <stdatomic.h>
 
 Wordlist filter(const Pattern pattern, const Wordlist words) {
   // allocate space assuming all words pass; probably too much space, but who
@@ -106,29 +107,27 @@ ulong cumulativeWordsLeft(const Pattern guess, const Wordlist solutions) {
 	return total;
 }
 
-BestWord findBestWord(const Wordlist allWords, const Wordlist solutions) {
+// find the best word to guess, where allWords is the full wordlist and
+// solutions is all possible solutions
+// also displays a progress bar
+BestWord findBestWord(const Wordlist allWords, const Wordlist solutions,
+		atomic_uint* const counter) {
 	assert(allWords.count > 0);
 	assert(solutions.count > 0);
 
 	Pattern bestWord;
 	ulong lowestScore = ULONG_MAX;
-	// char label[100];
-	// progressbar* progress = progressbar_new("", allWords.count);
 
 	for (uint guessIdx = 0; guessIdx < allWords.count; guessIdx++) {
-		// sprintf(label, "Processing %i/%i", guessIdx+1, allWords.count);
-		// progressbar_update_label(progress, label);
-
 		ulong score = cumulativeWordsLeft(allWords.data[guessIdx], solutions);
 		if (score < lowestScore) {
 			bestWord = allWords.data[guessIdx];
 			lowestScore = score;
 		}
 
-		// progressbar_inc(progress);
+		(*counter)++;
 	}
 
-	// progressbar_finish(progress);
 	BestWord asStruct = {bestWord, lowestScore};
 	return asStruct;
 }
@@ -137,20 +136,40 @@ BestWord findBestWord(const Wordlist allWords, const Wordlist solutions) {
 typedef struct {
 	Wordlist words;
 	Wordlist solutions;
+	atomic_uint* counter;
 } WordsSolutions;
 
 // can only use one argument for threads, has to return void*
 void* findBestWordWrapper(void* arg) {
 	WordsSolutions* casted = (WordsSolutions*) arg;
-	BestWord bestWord = findBestWord(casted->words, casted->solutions);
+	BestWord bestWord = findBestWord(casted->words, casted->solutions, casted->counter);
 	BestWord* asPtr = (BestWord*)calloc(1, sizeof(BestWord)); // have to return a void*
 	memcpy(asPtr, &bestWord, sizeof(BestWord));
 	return asPtr;
 };
 
+// blocks until completed >= total
+void displayProgress(const atomic_uint* const completed, const uint total) {
+	bool keepGoing = true; // continue for one extra loop
+	char label[100];
+	progressbar* progress = progressbar_new("", total);
+
+	while (keepGoing) {
+		uint tempCompleted = *completed; // make sure it doesn't change
+		sprintf(label, "Processing %i/%i", tempCompleted, total);
+		progressbar_update_label(progress, label);
+		progressbar_update(progress, tempCompleted);
+		// make sure the last iteration is drawn, so we end with a full progressbar no matter what
+		keepGoing = tempCompleted < total;
+	}
+
+	progressbar_finish(progress);
+}
+
 BestWord threadedFindWord(const Wordlist allWords, const Wordlist solutions, uint threadCount) {
 	assert(allWords.count > 0);
 	assert(solutions.count > 0);
+	assert(threadCount > 0);
 
 	// don't spawn more threads than there are words
 	if (allWords.count < threadCount)
@@ -158,6 +177,7 @@ BestWord threadedFindWord(const Wordlist allWords, const Wordlist solutions, uin
 
 	pthread_t* threads = calloc(threadCount, sizeof(pthread_t));
 	WordsSolutions* searchSpaces = calloc(threadCount, sizeof(WordsSolutions));
+	atomic_uint counter = 0;
 
 	// create the threads
 	uint alreadyProcessed = 0; // count the words we've already made threads for
@@ -167,14 +187,17 @@ BestWord threadedFindWord(const Wordlist allWords, const Wordlist solutions, uin
 		uint processUntil = ((ulong) allWords.count * (i + 1)) / threadCount;
 		Wordlist thisSection = {processUntil - alreadyProcessed, &allWords.data[alreadyProcessed]};
 
-		WordsSolutions searchSpace = {thisSection, solutions};
+		WordsSolutions searchSpace = {thisSection, solutions, &counter};
 		searchSpaces[i] = searchSpace; // keep the data after this loop iteration
 		// printf("Spawning thread for %i words @ %p. From %i to %i.\n", searchSpace.words.count,
 		// 		searchSpace.words.data, alreadyProcessed, processUntil);
 		pthread_create(&threads[i], NULL, findBestWordWrapper, &searchSpaces[i]);
 
-		alreadyProcessed = processUntil + 1; // don't reprocess the last word
+		alreadyProcessed = processUntil;
 	}
+
+	// wait for the operation to complete
+	displayProgress(&counter, allWords.count);
 
 	// get the results from the threads
 	BestWord bestWord = {ANYTHING, ULONG_MAX};
