@@ -33,6 +33,14 @@ CPMAddPackage(
 # has no cmakelists, so we have to do it ourselves
 add_library(c_hashmap ${c_hashmap_SOURCE_DIR}/map.c)
 
+CPMAddPackage(
+	NAME argparse
+	GITHUB_REPOSITORY cofyc/argparse
+	GIT_TAG 5559200a91a334e15391e8285571145f6b6cc002
+	VERSION 2.0 # grabbed from main, no actual version 2.0 exists
+	OPTIONS "ARGPARSE_SHARED OFF"
+)
+
 add_executable(prog)
 include("src/filelist.cmake")
 target_compile_options(prog PRIVATE "-march=native") # makes things faster, if less portable
