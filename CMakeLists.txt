@@ -41,6 +41,18 @@ CPMAddPackage(
 	OPTIONS "ARGPARSE_SHARED OFF"
 )
 
+CPMAddPackage(
+	NAME jansson
+	GITHUB_REPOSITORY akheron/jansson
+	VERSION 2.14.1
+	OPTIONS
+		"JANSSON_BUILD_DOCS OFF"
+		"JANSSON_BUILD_SHARED_LIBS OFF"
+		"JANSSON_EXAMPLES OFF"
+		"JANSSON_WITHOUT_TESTS ON"
+		"JANSSON_INSTALL OFF"
+)
+
 add_executable(prog)
 include("src/filelist.cmake")
 target_compile_options(prog PRIVATE "-march=native") # makes things faster, if less portable
@@ -49,6 +61,7 @@ target_compile_features(prog PRIVATE c_std_23)
 target_link_libraries(prog progressbar)
 target_link_libraries(prog c_hashmap)
 target_link_libraries(prog argparse_static)
+target_link_libraries(prog jansson)
 target_include_directories(prog PRIVATE ${progressbar_SOURCE_DIR}/include)
 # also has other files, but is the least messy solution
 target_include_directories(prog PRIVATE ${c_hashmap_SOURCE_DIR})
