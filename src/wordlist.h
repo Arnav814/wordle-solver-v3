@@ -8,7 +8,7 @@ typedef struct {
 } Wordlist;
 
 // allocates memory automatically
-Wordlist loadWordlist();
+Wordlist loadWordlist(const char* const path);
 
 void printWords(const Wordlist words);
 

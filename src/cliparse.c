@@ -6,8 +6,8 @@
 
 Config* configParse(int argc, char** argv) {
 	Config* config = calloc(1, sizeof(Config));
-	config->wordsFile = strdup("../wordlists/wordlist.txt");
-	config->solutionsFile = config->wordsFile;
+	config->wordsFile = "../wordlists/wordlist.txt";
+	config->solutionsFile = NULL; // set default later, in case wordsFile is changed
 	config->jobs = 1;
 	config->verbosity = 1;
 
@@ -27,6 +27,14 @@ Config* configParse(int argc, char** argv) {
 	struct argparse argparse;
 	argparse_init(&argparse, options, usages, 0);
 	argc = argparse_parse(&argparse, argc, (const char**) argv);
+
+	config->wordsFile = strdup(config->wordsFile); // necesary, for some reason
+
+	// if not set, default to the wordlist
+	if (config->solutionsFile == NULL)
+		config->solutionsFile = config->wordsFile;
+	else
+		config->solutionsFile = strdup(config->solutionsFile); // again, IDK why I need this
 
 	return config;
 }
