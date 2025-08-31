@@ -1,7 +1,10 @@
 #ifndef ALGORITHM_H
 #define ALGORITHM_H
+#include "cliparse.h"
 #include "pattern.h"
 #include "wordlist.h"
+
+extern Config* config;
 
 // returns a copy of the provided wordlist containing all words that match pattern
 Wordlist filter(const Pattern pattern, const Wordlist words);

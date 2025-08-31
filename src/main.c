@@ -1,10 +1,15 @@
 #include "wordlist.h"
 #include "algorithm.h"
 #include "userio.h"
+#include "cliparse.h"
 #include <stdio.h>
 #include <stdlib.h>
 
-int main() {
+Config* config;
+
+int main(int argc, char** argv) {
+	config = configParse(argc, argv);
+
 	Wordlist words = loadWordlist();
 	Wordlist solutions = copyWordlist(words);
 	Pattern knownInfo = ANYTHING;
@@ -17,7 +22,7 @@ int main() {
 
 		Pattern guess;
 		if (iteration == 0) guess = str2pattern("lares"); // first word is really slow
-		else guess = threadedFindWord(words, solutions, 4).word;
+		else guess = threadedFindWord(words, solutions, config->jobs).word;
 		Pattern update = readPattern(guess);
 		// printf("upd:");
 		// printPattern(update);
@@ -44,5 +49,6 @@ int main() {
 
 	free(words.data);
 	free(solutions.data);
+	configFree(config);
 }
 

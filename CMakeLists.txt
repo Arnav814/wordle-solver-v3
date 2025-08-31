@@ -48,9 +48,11 @@ target_compile_features(prog PRIVATE cxx_std_23)
 target_compile_features(prog PRIVATE c_std_23)
 target_link_libraries(prog progressbar)
 target_link_libraries(prog c_hashmap)
+target_link_libraries(prog argparse_static)
 target_include_directories(prog PRIVATE ${progressbar_SOURCE_DIR}/include)
 # also has other files, but is the least messy solution
 target_include_directories(prog PRIVATE ${c_hashmap_SOURCE_DIR})
+target_include_directories(prog PRIVATE ${argparse_SOURCE_DIR})
 
 if (DEFINED MY_COMPILE_OPTS) # defined by CMakePresets.json sometimes
 	separate_arguments(MY_CXX_FLAGS UNIX_COMMAND ${MY_COMPILE_OPTS})
