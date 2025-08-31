@@ -193,15 +193,18 @@ BestWord threadedFindWord(const Wordlist allWords, const Wordlist solutions, uin
 
 		WordsSolutions searchSpace = {thisSection, solutions, &counter};
 		searchSpaces[i] = searchSpace; // keep the data after this loop iteration
-		// printf("Spawning thread for %i words @ %p. From %i to %i.\n", searchSpace.words.count,
-		// 		searchSpace.words.data, alreadyProcessed, processUntil);
+
+		if (config->verbosity >= 3)
+			printf("Spawning thread for %i words @ %p. From %i to %i.\n", searchSpace.words.count,
+					searchSpace.words.data, alreadyProcessed, processUntil);
 		pthread_create(&threads[i], NULL, findBestWordWrapper, &searchSpaces[i]);
 
 		alreadyProcessed = processUntil;
 	}
 
 	// wait for the operation to complete
-	displayProgress(&counter, allWords.count);
+	if (config->verbosity >= 1)
+		displayProgress(&counter, allWords.count);
 
 	// get the results from the threads
 	BestWord bestWord = {ANYTHING, ULONG_MAX};
@@ -209,10 +212,12 @@ BestWord threadedFindWord(const Wordlist allWords, const Wordlist solutions, uin
 		BestWord* fromThread = NULL;
 		pthread_join(threads[i], (void**) &fromThread);
 
-		// char asStr[6];
-		// asStr[5] = 0;
-		// pattern2str(fromThread->word, asStr);
-		// printf("Thread says: %s, %lu.\n", asStr, fromThread->score);
+		if (config->verbosity >= 3) {
+			char asStr[6];
+			asStr[5] = 0;
+			pattern2str(fromThread->word, asStr);
+			printf("Thread says: %s, %lu.\n", asStr, fromThread->score);
+		}
 
 		// keep the best word
 		if (fromThread->score < bestWord.score)

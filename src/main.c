@@ -24,8 +24,13 @@ int main(int argc, char** argv) {
 		// printWords(solutions);
 		// printf("\n");
 
-		Pattern guess = threadedFindWord(words, solutions, config->jobs).word;
-		Pattern update = readPattern(guess);
+		BestWord guess = threadedFindWord(words, solutions, config->jobs);
+		if (config->verbosity >= 2)
+			printf("There are %u possible solutions. Expecting next iteration "
+					"to have ~%.2f possible solutions.\n", solutions.count,
+					(double) guess.score / words.count);
+
+		Pattern update = readPattern(guess.word);
 		// printf("upd:");
 		// printPattern(update);
 		knownInfo = composePatterns(knownInfo, update);
