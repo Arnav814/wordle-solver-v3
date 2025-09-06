@@ -3,6 +3,7 @@
 
 target_sources(prog PRIVATE
 	"./src/algorithm.c"
+	"./src/cache.c"
 	"./src/cliparse.c"
 	"./src/main.c"
 	"./src/pattern.c"

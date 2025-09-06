@@ -44,7 +44,8 @@ CPMAddPackage(
 CPMAddPackage(
 	NAME jansson
 	GITHUB_REPOSITORY akheron/jansson
-	VERSION 2.14.1
+	GIT_TAG 154f8919fb0d3778282b797789ad985e3d99fdc8
+	VERSION 2.14.1.2 # not a release, grabbed from master to get unreleased CMake config fixes
 	OPTIONS
 		"JANSSON_BUILD_DOCS OFF"
 		"JANSSON_BUILD_SHARED_LIBS OFF"

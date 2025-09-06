@@ -13,6 +13,7 @@ typedef struct {
 // filters anything
 #define ANY_LETTER 0b11111111111111111111111111
 #define ANYTHING {ANY_LETTER, ANY_LETTER, ANY_LETTER, ANY_LETTER, ANY_LETTER}
+#define NULL_PATTERN {0, 0, 0, 0, 0}
 
 // Stores characters as an int, where all letters have a corresponding bit.
 // This way, words and patterns have the same representation, composing
