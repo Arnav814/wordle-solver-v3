@@ -54,23 +54,41 @@ CPMAddPackage(
 		"JANSSON_INSTALL OFF"
 )
 
-add_executable(prog)
+CPMAddPackage(
+	NAME Unity
+	GITHUB_REPOSITORY ThrowTheSwitch/Unity
+	VERSION 2.6.1
+)
+
+# all the files that don't have main functions
+add_library(modules)
 include("src/filelist.cmake")
-target_compile_options(prog PRIVATE "-march=native") # makes things faster, if less portable
-target_compile_features(prog PRIVATE cxx_std_23)
-target_compile_features(prog PRIVATE c_std_23)
-target_link_libraries(prog progressbar)
-target_link_libraries(prog c_hashmap)
-target_link_libraries(prog argparse_static)
-target_link_libraries(prog jansson)
-target_include_directories(prog PRIVATE ${progressbar_SOURCE_DIR}/include)
+
+# supply config here, so it propagates to both targets
+target_compile_options(modules PUBLIC "-march=native") # makes things faster, if less portable
+target_compile_features(modules PUBLIC cxx_std_23)
+target_compile_features(modules PUBLIC c_std_23)
+target_link_libraries(modules progressbar)
+target_link_libraries(modules c_hashmap)
+target_link_libraries(modules argparse_static)
+target_link_libraries(modules jansson)
+target_include_directories(modules PRIVATE ${progressbar_SOURCE_DIR}/include)
 # also has other files, but is the least messy solution
-target_include_directories(prog PRIVATE ${c_hashmap_SOURCE_DIR})
-target_include_directories(prog PRIVATE ${argparse_SOURCE_DIR})
+target_include_directories(modules PRIVATE ${c_hashmap_SOURCE_DIR})
+target_include_directories(modules PRIVATE ${argparse_SOURCE_DIR})
 
 if (DEFINED MY_COMPILE_OPTS) # defined by CMakePresets.json sometimes
 	separate_arguments(MY_CXX_FLAGS UNIX_COMMAND ${MY_COMPILE_OPTS})
-	target_compile_options(prog PRIVATE ${MY_CXX_FLAGS})
-	target_link_options(prog PRIVATE ${MY_CXX_FLAGS})
+	target_compile_options(modules PUBLIC ${MY_CXX_FLAGS})
+	target_link_options(modules PUBLIC ${MY_CXX_FLAGS})
 endif()
+
+add_executable(prog src/main.c)
+target_link_libraries(prog modules)
+
+add_executable(test src/test.c)
+target_link_libraries(test modules)
+target_link_libraries(test unity::framework)
+
+add_test(NAME tests COMMAND ${CMAKE_CURRENT_BINARY_DIR}/test)
 

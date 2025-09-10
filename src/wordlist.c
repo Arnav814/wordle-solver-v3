@@ -56,3 +56,15 @@ Wordlist copyWordlist(const Wordlist initial) {
 	Wordlist out = {initial.count, copied};
 	return out;
 }
+
+bool wordlistHasValue(const Wordlist wordlist) {
+	return wordlist.count != 0 && wordlist.data != NULL;
+}
+
+bool wordlistsAreEqual(const Wordlist a, const Wordlist b) {
+	if (a.count != b.count)
+		return false;
+
+	return memcmp(a.data, b.data, sizeof(Pattern) * a.count) == 0;
+}
+
