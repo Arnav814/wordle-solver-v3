@@ -86,7 +86,7 @@ endif()
 add_executable(prog src/main.c)
 target_link_libraries(prog modules)
 
-add_executable(test src/test.c)
+add_executable(test test/test.c)
 target_link_libraries(test modules)
 target_link_libraries(test unity::framework)
 
