@@ -100,9 +100,25 @@ Cache* cacheInit() {
 	return out;
 }
 
+// gets the modification time of the file at path in seconds, crashing if the file doesn't exist
+time_t getMTime(const char* const path) {
+	struct stat attr;
+	int status = stat(path, &attr);
+
+	if (status == -1) {
+		printf("Failed to stat file %s, got error %i.\n", path, errno);
+		exit(1);
+	}
+
+	return attr.st_mtim.tv_sec;
+}
+
 // search the cache for the entry matching the current config, returns NULL if not found
 // if outIndex is not null, it will be set to the index of the found entry or not modified
-json_t* findEntry(const Cache* const cache, const Config* const config, size_t* outIndex) {
+// if useMTime is true, then it takes modification times into account
+// returns a new reference to the JSON object
+json_t* findEntry(const Cache* const cache, const Config* const config, const
+		bool useMTime, size_t* outIndex) {
 	size_t index;
 	json_t* value;
 
@@ -124,19 +140,46 @@ json_t* findEntry(const Cache* const cache, const Config* const config, size_t* 
 			exit(1);
 		}
 
-		if (strcmp(wordListPath, config->wordsFile) == 0 &&
-				strcmp(solListPath, config->solutionsFile) == 0) {
-			if (outIndex) *outIndex = index;
-			json_incref(value);
-			return value;
+		// check the filenames match
+		if (strcmp(wordListPath, config->wordsFile) != 0 ||
+				strcmp(solListPath, config->solutionsFile) != 0)
+			continue;
+
+		if (useMTime) {
+			// get the modification times
+			json_t* wordListMTimeJson = json_object_get(value, "wmtime");
+			json_t* solListMTimeJson = json_object_get(value, "smtime");
+
+			if (!wordListMTimeJson || ! solListMTimeJson) {
+				printf("Missing modification times in cache entry #%zu.\n", index);
+				exit(1);
+			}
+
+			time_t wordListMTime = json_integer_value(wordListMTimeJson);
+			time_t solListMTime = json_integer_value(solListMTimeJson);
+
+			if (wordListMTime == 0 || solListMTime == 0) {
+				printf("Invalid type for modification times (or times are 0) in cache entry #%zu.\n", index);
+				exit(1);
+			}
+
+			// use != instead of > because if the modification time has gone backwards, something
+			// weird has happened and we should recompute things anyway
+			if (getMTime(wordListPath) != wordListMTime ||
+					getMTime(solListPath) != solListMTime)
+				continue;
 		}
+
+		if (outIndex) *outIndex = index;
+		json_incref(value);
+		return value;
 	}
 
 	return NULL;
 }
 
 BestWord cacheGet(const Cache* const cache, const Config* const config) {
-	json_auto_t* entry = findEntry(cache, config, NULL);
+	json_auto_t* entry = findEntry(cache, config, true, NULL);
 
 	// if the entry isn't in the cache
 	if (!entry) {
@@ -180,7 +223,7 @@ void writeCache(const Cache* const cache) {
 
 	size_t flags;
 #ifndef NDEBUG
-	flags = JSON_INDENT(4); // pretty print when debbuging
+	flags = JSON_INDENT(4); // pretty print when debugging
 #else
 	flags = JSON_COMPACT; // be compact for releases
 #endif
@@ -199,6 +242,8 @@ void cacheSet(Cache* const cache, const Config* const config, const BestWord wor
 	json_auto_t* newEntry = json_object();
 	json_object_set_new(newEntry, "wlist", json_string(config->wordsFile));
 	json_object_set_new(newEntry, "slist", json_string(config->solutionsFile));
+	json_object_set_new(newEntry, "wmtime", json_integer(getMTime(config->wordsFile)));
+	json_object_set_new(newEntry, "smtime", json_integer(getMTime(config->solutionsFile)));
 	json_object_set_new(newEntry, "score", json_integer(word.score));
 
 	char wordAsStr[6];
@@ -207,7 +252,7 @@ void cacheSet(Cache* const cache, const Config* const config, const BestWord wor
 	json_object_set_new(newEntry, "word", json_string(wordAsStr));
 
 	size_t index;
-	json_auto_t* oldEntry = findEntry(cache, config, &index);
+	json_auto_t* oldEntry = findEntry(cache, config, false, &index);
 
 	if (oldEntry) // remove the old entry, if it exists
 		json_array_remove(cache->cache, index);
