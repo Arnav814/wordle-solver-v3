@@ -39,7 +39,7 @@ char* getCachePath() {
 	// in most cases, cacheDir should now be $HOME/.cache/wordlebot3
 
 	// if cachePath doesn't exist, create it
-	if(mkdir(cacheDir, 775) < 0 && errno != EEXIST) {
+	if(mkdir(cacheDir, 0775) < 0 && errno != EEXIST) {
 		printf("Error %i when attempting to create directory %s.\n", errno, cacheDir);
 		exit(1);
 	}
@@ -57,28 +57,46 @@ Cache* cacheInit() {
 
 	json_t* root = NULL;
 	json_error_t error;
-	FILE* cacheFile = fopen(cachePath, "w+");
+	FILE* cacheFile = fopen(cachePath, "r");
 	if (!cacheFile && errno == ENOENT) { // file doesn't exist
-		root = json_object();
+		root = json_array();
 	} else if (!cacheFile) { // some other error
 		printf("Error %i when attempting to read file %s.\n", errno, cachePath);
 		exit(1);
 	} else { // normal operation
-		root = json_loadf(cacheFile, JSON_REJECT_DUPLICATES, &error);
-		if (!root) {
-			printf("Error decoding JSON: %s. Encountered in %s:%i:%i (pos: %i).\n",
-					error.text, error.source, error.line, error.column, error.position);
-			exit(1);
-		} else if (!json_is_array(root)) {
-			printf("JSON cache is not formatted correctly (expected top-level array).\n");
+		if (fseek(cacheFile, 0, SEEK_END) == -1) {
+			printf("Error while trying to get size of %s. (Call to fseek failed with %i.)\n",
+					cachePath, errno);
 			exit(1);
 		}
+
+		long size = ftell(cacheFile);
+		if (size == -1) {
+			printf("Error while trying to get size of %s. (Call to ftell failed with %i.)\n",
+					cachePath, errno);
+			exit(1);
+		}
+		rewind(cacheFile);
+
+		if (size != 0) {
+			root = json_loadf(cacheFile, JSON_REJECT_DUPLICATES, &error);
+			if (!root) {
+				printf("Error decoding JSON: %s. Encountered in %s:%i:%i (pos: %i).\n",
+						error.text, error.source, error.line, error.column, error.position);
+				exit(1);
+			} else if (!json_is_array(root)) {
+				printf("JSON cache is not formatted correctly (expected top-level array).\n");
+				exit(1);
+			}
+		} else { // file is empty
+			root = json_array();
+		}
+
 		out->cache = root;
+		fclose(cacheFile);
 	}
 
-	fclose(cacheFile);
 	out->cachePath = cachePath;	// don't free because it's included in the returned struct
-
 	return out;
 }
 
@@ -90,8 +108,8 @@ json_t* findEntry(const Cache* const cache, const Config* const config, size_t* 
 
 	// TODO: check modification times for files
 	json_array_foreach(cache->cache, index, value) {
-		json_auto_t* wordList = json_object_get(value, "wlist");
-		json_auto_t* solutionList = json_object_get(value, "slist");
+		json_t* wordList = json_object_get(value, "wlist");
+		json_t* solutionList = json_object_get(value, "slist");
 
 		if (!wordList || !solutionList) {
 			printf("Missing attributes in cache entry #%zu.\n", index);
