@@ -122,7 +122,6 @@ json_t* findEntry(const Cache* const cache, const Config* const config, const
 	size_t index;
 	json_t* value;
 
-	// TODO: check modification times for files
 	json_array_foreach(cache->cache, index, value) {
 		json_t* wordList = json_object_get(value, "wlist");
 		json_t* solutionList = json_object_get(value, "slist");
@@ -215,6 +214,7 @@ BestWord cacheGet(const Cache* const cache, const Config* const config) {
 
 // write the cache to disk
 void writeCache(const Cache* const cache) {
+	// TODO: limit cache size by removing old entries
 	FILE* cacheFile = fopen(cache->cachePath, "w+");
 	if (!cacheFile) {
 		printf("Error %i when attempting to write to file %s.\n", errno, cache->cachePath);
