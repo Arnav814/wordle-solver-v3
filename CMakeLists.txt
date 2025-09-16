@@ -86,9 +86,9 @@ endif()
 add_executable(prog src/main.c)
 target_link_libraries(prog modules)
 
-add_executable(test test/test.c)
-target_link_libraries(test modules)
-target_link_libraries(test unity::framework)
+add_executable(test-bin test/test.c)
+target_link_libraries(test-bin modules)
+target_link_libraries(test-bin unity::framework)
 
-add_test(NAME tests COMMAND ${CMAKE_CURRENT_BINARY_DIR}/test)
+add_test(NAME tests COMMAND ${CMAKE_CURRENT_BINARY_DIR}/test-bin)
 

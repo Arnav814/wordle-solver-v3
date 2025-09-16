@@ -4,11 +4,19 @@
 #include <string.h>
 #include <assert.h>
 
-Pattern parsePattern(const Pattern word, const char* const text) {
-	// bad, placeholder error handling
+bool validateInput(const char* const text) {
 	for (uint i = 0; i < 5; i++) {
-		assert(text[i] == 'g' || text[i] == 'y' || text[i] == 'n');
+		// the == 0 check will also catch input that is too short
+		if (!(text[i] == 'g' || text[i] == 'y' || text[i] == 'n') || text[i] == 0) {
+			return false;
+		}
 	}
+
+	return strlen(text) == 5;
+}
+
+Pattern parsePattern(const Pattern word, const char* const text) {
+	assert(validateInput(text));
 
 	Pattern out = ANYTHING;
 	// have to check before, to remove from the entire pattern without affecting duplicates
@@ -38,15 +46,29 @@ Pattern parsePattern(const Pattern word, const char* const text) {
 }
 
 Pattern readPattern(const Pattern word) {
-	char wordStr[6];
-	wordStr[5] = 0;
-	pattern2str(word, wordStr);
-	printf("Guessed: %s\n", wordStr);
+	bool inputIsValid = false;
+	Pattern out;
 
-	char* input;
-	scanf("%ms", &input);
-	assert(strlen(input) >= 5); // TODO: better error handling
-	Pattern out = parsePattern(word, input);
-	free(input);
+	while (!inputIsValid) {
+		char wordStr[6];
+		wordStr[5] = 0;
+		pattern2str(word, wordStr);
+		printf("Guessed: %s\n", wordStr);
+
+		char* input;
+		scanf("%ms", &input);
+		inputIsValid = validateInput(input);
+
+		if (inputIsValid) {
+			out = parsePattern(word, input);
+		} else {
+			printf("Invalid input. Please enter a 5 character string where:\n"
+					"\t'g' means the letter was an exact match (green)\n"
+					"\t'y' means the letter was a partial match (yellow)\n"
+					"\t'n' means the letter was not in the solution at all (gray).\n");
+		}
+
+		free(input);
+	}
 	return out;
 }
