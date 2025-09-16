@@ -90,5 +90,5 @@ add_executable(test-bin test/test.c)
 target_link_libraries(test-bin modules)
 target_link_libraries(test-bin unity::framework)
 
-add_test(NAME tests COMMAND ${CMAKE_CURRENT_BINARY_DIR}/test-bin)
+add_custom_target(test COMMAND ${CMAKE_CURRENT_BINARY_DIR}/test-bin)
 
