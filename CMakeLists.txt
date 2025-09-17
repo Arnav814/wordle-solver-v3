@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.29)
-project(wordlebot)
+project(wordlebot LANGUAGES C)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -65,8 +65,6 @@ add_library(modules)
 include("src/filelist.cmake")
 
 # supply config here, so it propagates to both targets
-target_compile_options(modules PUBLIC "-march=native") # makes things faster, if less portable
-target_compile_features(modules PUBLIC cxx_std_23)
 target_compile_features(modules PUBLIC c_std_23)
 target_link_libraries(modules progressbar)
 target_link_libraries(modules c_hashmap)
@@ -79,9 +77,15 @@ target_include_directories(modules PRIVATE ${argparse_SOURCE_DIR})
 
 if (DEFINED MY_COMPILE_OPTS) # defined by CMakePresets.json sometimes
 	separate_arguments(MY_CXX_FLAGS UNIX_COMMAND ${MY_COMPILE_OPTS})
-	target_compile_options(modules PUBLIC ${MY_CXX_FLAGS})
-	target_link_options(modules PUBLIC ${MY_CXX_FLAGS})
+else()
+	set(MY_CXX_FLAGS -Wall -Wextra) # turn common warnings on
+	# some presets override this
+	target_compile_options(modules PUBLIC "$<$<CONFIG:DEBUG>:-O2>")
+	target_compile_options(modules PUBLIC "$<$<CONFIG:RELEASE>:-O3>")
+	target_compile_options(modules PUBLIC "$<$<CONFIG:RELWITHDEBINFO>:-O3>")
 endif()
+target_compile_options(modules PUBLIC ${MY_CXX_FLAGS})
+target_link_options(modules PUBLIC ${MY_CXX_FLAGS})
 
 add_executable(prog src/main.c)
 target_link_libraries(prog modules)
