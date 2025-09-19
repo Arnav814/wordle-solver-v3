@@ -4,7 +4,8 @@
 #include <string.h>
 #include <assert.h>
 
-bool validateInput(const char* const text) {
+/* Does *not* assume text is null-terminated */
+bool basicValidate(const char* const text) {
 	for (uint i = 0; i < 5; i++) {
 		// the == 0 check will also catch input that is too short
 		if (!(text[i] == 'g' || text[i] == 'y' || text[i] == 'n') || text[i] == 0) {
@@ -12,11 +13,16 @@ bool validateInput(const char* const text) {
 		}
 	}
 
-	return strlen(text) == 5;
+	return true;
+}
+
+/* Assumes text is null terminated */
+bool validateInput(const char* const text) {
+	return basicValidate(text) && strlen(text) == 5;
 }
 
 Pattern parsePattern(const Pattern word, const char* const text) {
-	assert(validateInput(text));
+	assert(basicValidate(text));
 
 	Pattern out = ANYTHING;
 	// have to check before, to remove from the entire pattern without affecting duplicates

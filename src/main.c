@@ -46,6 +46,7 @@ int main(int argc, char** argv) {
 			guess = threadedFindWord(words, solutions, config->jobs);
 		}
 
+			printf("gsc:%lu\n", guess.score);
 		if (config->verbosity >= 2)
 			printf("There are %u possible solutions. Expecting next iteration "
 					"to have ~%.2f possible solutions.\n", solutions.count,

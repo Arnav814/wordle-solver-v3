@@ -71,7 +71,7 @@ Pattern simGuess(const Pattern guess, Pattern solution) {
 	// char resStr[6];
 	// resStr[5] = 0;
 	// memcpy(resStr, result, 5);
-	// printf("%s", resStr);
+	// printf("%s\n", resStr);
 
 	return parsePattern(guess, result);
 }
@@ -96,8 +96,13 @@ ulong cumulativeWordsLeft(const Pattern guess, const Wordlist solutions) {
 		
 		// char guessStr[6];
 		// guessStr[5] = 0;
-		// pattern2str(solutions.data[solutionIdx], guessStr);
-		// printf("### Adding %i for %s\n", filteredCount, guessStr);
+		// pattern2str(guess, guessStr);
+
+		// char loopStr[6];
+		// loopStr[5] = 0;
+		// pattern2str(solutions.data[solutionIdx], loopStr);
+
+		// printf("### %s: Adding %i for %s\n", guessStr, count, loopStr);
 
 		// Wordlist actualWords = filter(pattern, solutions);
 		// printWords(actualWords);
@@ -110,7 +115,6 @@ ulong cumulativeWordsLeft(const Pattern guess, const Wordlist solutions) {
 
 // find the best word to guess, where allWords is the full wordlist and
 // solutions is all possible solutions
-// also displays a progress bar
 BestWord findBestWord(const Wordlist allWords, const Wordlist solutions,
 		atomic_uint* const counter) {
 	assert(allWords.count > 0);

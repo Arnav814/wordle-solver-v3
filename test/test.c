@@ -94,15 +94,11 @@ void test_commutative_compose() {
 }
 
 void test_user_input_validation() {
-	char bad[] = "njnnn";
-	char alsoBad[] = "gng\0"; // too short strings will only be caught if they're null-terminated
-	char stillBad[] = "nnnnnn";
-	char good[] = "ynngn";
-
-	TEST_ASSERT_FALSE(validateInput(bad));
-	TEST_ASSERT_FALSE(validateInput(alsoBad));
-	TEST_ASSERT_FALSE(validateInput(stillBad));
-	TEST_ASSERT_TRUE(validateInput(good));
+	TEST_ASSERT_FALSE(validateInput("njnnn"));
+	TEST_ASSERT_FALSE(validateInput("gng\0")); // too short strings will only be caught if they're null-terminated
+	TEST_ASSERT_FALSE(validateInput("nnnnnn"));
+	TEST_ASSERT_TRUE(validateInput("ynngn"));
+	TEST_ASSERT_TRUE(validateInput("ggggg"));
 }
 
 int main() {
