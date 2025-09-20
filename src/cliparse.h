@@ -7,6 +7,8 @@ typedef struct {
 	char* solutionsFile; // file path to load solutions from
 	uint jobs; // number of threads
 	uint verbosity; // verbosity, 0 to 3, default 1
+	char* solution; // run automatically, counting guesses to finding a provided solution.
+	// constains the actual solution if autosolve is specified otherwise null
 } Config;
 
 // argv is modified and unusable after this; make a copy if needed

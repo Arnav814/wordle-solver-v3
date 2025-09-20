@@ -157,7 +157,7 @@ void* findBestWordWrapper(void* arg) {
 void displayProgress(const atomic_uint* const completed, const uint total) {
 	bool keepGoing = true; // continue for one extra loop
 	char label[100];
-	progressbar* progress = progressbar_new("", total);
+	progressbar* progress = progressbar_new_with_format("", total, "[#]");
 
 	while (keepGoing) {
 		uint tempCompleted = *completed; // make sure it doesn't change

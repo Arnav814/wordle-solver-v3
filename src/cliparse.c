@@ -10,6 +10,7 @@ Config* configParse(int argc, char** argv) {
 	config->solutionsFile = NULL; // set default later, in case wordsFile is changed
 	config->jobs = 1;
 	config->verbosity = 1;
+	config->solution = NULL;
 
 	struct argparse_option options[] = {
 		OPT_HELP(),
@@ -17,6 +18,7 @@ Config* configParse(int argc, char** argv) {
 		OPT_STRING('s', "solutions", &config->solutionsFile, "File for all possible solutions.", NULL, 0, 0),
 		OPT_INTEGER('j', "jobs", &config->jobs, "Number of threads to use.", NULL, 0, 0),
 		OPT_INTEGER('v', "verbosity", &config->verbosity, "How verbose to be from 0 to 3.", NULL, 0, 0),
+		OPT_STRING('a', "autoscore", &config->solution, "Assume this word is the solution and run without input.", NULL, 0, 0),
 		OPT_END(),
 	};
 	const char* const usages[] = {
@@ -36,6 +38,9 @@ Config* configParse(int argc, char** argv) {
 	else
 		config->solutionsFile = strdup(config->solutionsFile); // again, IDK why I need this
 
+	if (config->solution)
+		config->solution = strdup(config->solution);
+
 	return config;
 }
 
@@ -44,6 +49,8 @@ void configFree(Config* config) {
 	if (config->wordsFile != config->solutionsFile)
 		free(config->solutionsFile);
 	free(config->wordsFile);
+	if (config->solution)
+		free(config->solution);
 	free(config);
 }
 

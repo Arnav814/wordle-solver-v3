@@ -1,4 +1,5 @@
 #include "userio.h"
+#include "algorithm.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -51,7 +52,11 @@ Pattern parsePattern(const Pattern word, const char* const text) {
 	return out;
 }
 
-Pattern readPattern(const Pattern word) {
+Pattern readPattern(const Pattern word, const Config* const config) {
+	// if we're using a predetermined solution to test the algorithm
+	if (config->solution)
+		return simGuess(word, str2pattern(config->solution));
+
 	bool inputIsValid = false;
 	Pattern out;
 

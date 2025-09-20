@@ -46,13 +46,12 @@ int main(int argc, char** argv) {
 			guess = threadedFindWord(words, solutions, config->jobs);
 		}
 
-			printf("gsc:%lu\n", guess.score);
 		if (config->verbosity >= 2)
 			printf("There are %u possible solutions. Expecting next iteration "
-					"to have ~%.2f possible solutions.\n", solutions.count,
-					(double) guess.score / words.count);
+					"to have ~%.2f possible solutions (score: %lu).\n",
+					solutions.count, (double) guess.score / solutions.count, guess.score);
 
-		Pattern update = readPattern(guess.word);
+		Pattern update = readPattern(guess.word, config);
 		// printf("upd:");
 		// printPattern(update);
 		knownInfo = composePatterns(knownInfo, update);
@@ -69,7 +68,7 @@ int main(int argc, char** argv) {
 		char solutionStr[6];
 		solutionStr[5] = 0;
 		pattern2str(solutions.data[0], solutionStr);
-		printf("The solution is %s.\n", solutionStr);
+		printf("The solution is %s (%i guesses made).\n", solutionStr, iteration);
 	} else {
 		printf("No more possible solutions. Either the actual solution is not in the provided "
 				"wordlist, or you entered something incorrectly.\n");
