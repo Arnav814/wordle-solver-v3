@@ -4,6 +4,10 @@
 #include <string.h>
 #include <assert.h>
 
+char* lookupWordlist(const char* const path, const Config* const config) {
+	
+}
+
 Wordlist loadWordlist(const char* const path) {
 	FILE* file = fopen(path, "r");
 	char line[7]; // include the newline char

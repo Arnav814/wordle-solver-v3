@@ -87,8 +87,8 @@ endif()
 target_compile_options(modules PUBLIC ${MY_CXX_FLAGS})
 target_link_options(modules PUBLIC ${MY_CXX_FLAGS})
 
-add_executable(prog src/main.c)
-target_link_libraries(prog modules)
+add_executable(wordlebot src/main.c)
+target_link_libraries(wordlebot modules)
 
 add_executable(test-bin test/test.c)
 target_link_libraries(test-bin modules)

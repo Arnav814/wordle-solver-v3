@@ -1,8 +1,52 @@
 #include "cliparse.h"
 #include <stddef.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <argparse.h>
 #include <string.h>
+
+// add the search path to the provided config struct
+// this should be searched in reverse order
+void parseConfigPath(Config* config) {
+	const char* const userProvided = getenv("WORDLIST_PATH");
+
+	uint capacity = 1; // possible space in array of char*
+	config->searchEntries = 0; // actual number of entries
+	config->searchPath = calloc(capacity, sizeof(char*));
+
+	// reallocates if neccesary, then appends entry to config->searchPath
+#	define APPEND(entry) do {\
+			if (capacity <= config->searchEntries) { \
+				capacity *= 2; \
+				config->searchPath = reallocarray(config->searchPath, capacity, sizeof(char*)); \
+			} \
+\
+			config->searchPath[config->searchEntries++] = entry; } while (false)
+
+	// default paths to check
+	APPEND(strdup("/usr/l"));
+
+	// the user has provided a custom path
+	if (userProvided && *userProvided) {
+		char* wlPath = strdup(userProvided);
+		char* toFree = wlPath; // keep a reference so it can be freed
+		char* token;
+		
+		while ((token = strsep(&wlPath, ":"))) {
+			if (token[0] != '/') {
+				printf("Paths provided in WORDLIST_PATH must be absolute and not empty, \"%s\" is not.\n", token);
+				exit(1);
+			}
+		}
+
+		APPEND(strdup(token));
+
+		free(toFree);
+	}
+
+	config->searchPath = reallocarray(config->searchPath, config->searchEntries, sizeof(char*));
+#	undef APPEND
+}
 
 Config* configParse(int argc, char** argv) {
 	Config* config = calloc(1, sizeof(Config));
@@ -41,6 +85,8 @@ Config* configParse(int argc, char** argv) {
 	if (config->solution)
 		config->solution = strdup(config->solution);
 
+	parseConfigPath(config);
+
 	return config;
 }
 
@@ -49,8 +95,15 @@ void configFree(Config* config) {
 	if (config->wordsFile != config->solutionsFile)
 		free(config->solutionsFile);
 	free(config->wordsFile);
+
 	if (config->solution)
 		free(config->solution);
+
+	for (uint i = 0; i < config->searchEntries; i++) {
+		free(config->searchPath[i]);
+	}
+	free(config->searchPath);
+
 	free(config);
 }
 
