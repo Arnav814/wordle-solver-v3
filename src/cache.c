@@ -1,4 +1,5 @@
 #include "cache.h"
+#include "fsutils.h"
 #include <errno.h>
 #include <jansson.h>
 #include <string.h>
@@ -12,38 +13,11 @@ struct Cache {
 	json_t* cache; // actual cache in memory
 };
 
-#define DOT_CACHE "/.cache"
-#define APPLICATION_DIR "/wordlebot3"
 #define CACHE_FILE_NAME "/cache.json"
 
-// returns the path to the cache file, malloc'ed on the heap
-// also creates parent directories, if necesary
 char* getCachePath() {
-	char* cacheDir = getenv("XDG_CACHE_HOME");
-	if (cacheDir == NULL) {
-		const char* home = getenv("HOME");
-		if (home == NULL || strcmp(home, "") == 0) {
-			printf("Couldn't find user's home directory.\n");
-			exit(1);
-		}
-
-		// fallback to $HOME/.cache
-		cacheDir = malloc(strlen(home) + strlen(DOT_CACHE) + 1);
-		strcpy(stpcpy(cacheDir, home), DOT_CACHE); // cacheDir = home + DOT_CACHE
-	} else {
-		cacheDir = strdup(cacheDir);
-	}
-
-	cacheDir = realloc(cacheDir, strlen(cacheDir) + strlen(APPLICATION_DIR) + 1);
-	strcat(cacheDir, APPLICATION_DIR);
-	// in most cases, cacheDir should now be $HOME/.cache/wordlebot3
-
-	// if cachePath doesn't exist, create it
-	if(mkdir(cacheDir, 0775) < 0 && errno != EEXIST) {
-		printf("Error %i when attempting to create directory %s.\n", errno, cacheDir);
-		exit(1);
-	}
-
+	char* cacheDir = getXdgPath("XDG_CACHE_HOME", "/.cache");
+	
 	char* cachePath = malloc(strlen(cacheDir) + strlen(CACHE_FILE_NAME) + 1);
 	strcpy(stpcpy(cachePath, cacheDir), CACHE_FILE_NAME); // cachePath = cacheDir + CACHE_FILE_NAME
 
@@ -98,19 +72,6 @@ Cache* cacheInit() {
 
 	out->cachePath = cachePath;	// don't free because it's included in the returned struct
 	return out;
-}
-
-// gets the modification time of the file at path in seconds, crashing if the file doesn't exist
-time_t getMTime(const char* const path) {
-	struct stat attr;
-	int status = stat(path, &attr);
-
-	if (status == -1) {
-		printf("Failed to stat file %s, got error %i.\n", path, errno);
-		exit(1);
-	}
-
-	return attr.st_mtim.tv_sec;
 }
 
 // search the cache for the entry matching the current config, returns NULL if not found
@@ -214,6 +175,7 @@ BestWord cacheGet(const Cache* const cache, const Config* const config) {
 
 // write the cache to disk
 void writeCache(const Cache* const cache) {
+	// TODO: use absolute paths so pwd doesn't affect this
 	// TODO: limit cache size by removing old entries
 	FILE* cacheFile = fopen(cache->cachePath, "w+");
 	if (!cacheFile) {

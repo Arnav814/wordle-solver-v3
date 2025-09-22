@@ -9,6 +9,7 @@ typedef struct {
 } Wordlist;
 
 // turn a wordlist name (ex: "small.txt") into an absolute path (ex: "/usr/share/wordlebot3/small.txt")
+// always returns a new string
 char* lookupWordlist(const char* const path, const Config* const config);
 
 // allocates memory automatically and calls lookupWordlist internally

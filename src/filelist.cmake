@@ -5,6 +5,7 @@ target_sources(modules PRIVATE
 	"./src/algorithm.c"
 	"./src/cache.c"
 	"./src/cliparse.c"
+	"./src/fsutils.c"
 	"./src/pattern.c"
 	"./src/userio.c"
 	"./src/wordlist.c"

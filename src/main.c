@@ -1,4 +1,5 @@
 #include "cache.h"
+#include "fsutils.h"
 #include "wordlist.h"
 #include "algorithm.h"
 #include "userio.h"

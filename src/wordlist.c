@@ -5,7 +5,16 @@
 #include <assert.h>
 
 char* lookupWordlist(const char* const path, const Config* const config) {
-	
+	// if the path starts with ./ or ../ it should always be treated as a plain path
+	// this is safe even with 1-char paths, because if the null terminator is found,
+	// the &&s will short-circuit
+	if (path[0] == '.' && (path[1] == '/' || (path[1] == '.' && path[2] == '/')))
+		return strdup(path);
+
+	// iterate backwards so entries specified last are searched first
+	for (uint i = config->searchEntries; i >= 0; i--) {
+		
+	}
 }
 
 Wordlist loadWordlist(const char* const path) {
