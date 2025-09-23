@@ -13,12 +13,12 @@ Config* config;
 int main(int argc, char** argv) {
 	config = configParse(argc, argv);
 
-	Wordlist words = loadWordlist(lookupWordlist(config->wordsFile, config));
+	Wordlist words = loadWordlist(config->wordsFile);
 
 	Wordlist solutions;
 	// don't reload the file from disk if it's the same
 	if (strcmp(config->wordsFile, config->solutionsFile) == 0) solutions = copyWordlist(words);
-	else solutions = loadWordlist(lookupWordlist(config->solutionsFile, config));
+	else solutions = loadWordlist(config->solutionsFile);
 	Pattern knownInfo = ANYTHING;
 
 	Cache* cache = cacheInit();

@@ -15,7 +15,7 @@ time_t getMTime(const char* const path);
 char* getXdgPath(const char* const envName, const char* const defaultPath);
 
 // recursively search dir for filename, returning null if nothing is found, otherwise returns file
-// opened with read-only access
-FILE* recursivelySearch(const char* const dirname, const char* const filename);
+// path, newly malloc'ed
+char* recursivelySearch(const char* const dirname, const char* const filename);
 
 #endif /* FSUTILS_H */

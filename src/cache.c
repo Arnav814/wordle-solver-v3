@@ -175,7 +175,6 @@ BestWord cacheGet(const Cache* const cache, const Config* const config) {
 
 // write the cache to disk
 void writeCache(const Cache* const cache) {
-	// TODO: use absolute paths so pwd doesn't affect this
 	// TODO: limit cache size by removing old entries
 	FILE* cacheFile = fopen(cache->cachePath, "w+");
 	if (!cacheFile) {

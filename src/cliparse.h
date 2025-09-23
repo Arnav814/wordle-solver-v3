@@ -18,6 +18,11 @@ typedef struct {
 
 } Config;
 
+
+// turn a wordlist name (ex: "small.txt") into an absolute path (ex: "/usr/share/wordlebot3/small.txt")
+// returns the filename or crashes if the file can't be found
+char* lookupWordlist(const char* const path, const Config* const config);
+
 // argv is modified and unusable after this; make a copy if needed
 Config* configParse(const int argc, char** argv);
 

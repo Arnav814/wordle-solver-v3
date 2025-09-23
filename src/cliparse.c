@@ -1,9 +1,42 @@
 #include "cliparse.h"
+#include "fsutils.h"
+#include <errno.h>
+#include <signal.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <argparse.h>
 #include <string.h>
+
+char* lookupWordlist(const char* const path, const Config* const config) {
+	char* relPath = NULL; // relative path (may contain ., .., or symlinks)
+	
+	// if the path starts with ./ or ../ it should always be treated as a plain path
+	// this is safe even with 1-char paths, because if the null terminator is found,
+	// the &&s will short-circuit
+	if (path[0] == '.' && (path[1] == '/' || (path[1] == '.' && path[2] == '/'))) {
+		relPath = strdup(path);
+	} else {
+		// iterate backwards so entries specified last are searched first
+		for (int i = config->searchEntries - 1; i >= 0; i--) {
+			relPath = recursivelySearch(config->searchPath[i], path);
+			if (relPath) break;
+		}
+	}
+
+	if (!relPath) {
+		printf("Failed to find wordlist \"%s\".\n", path);
+		exit(1);
+	} else {
+		char* absPath = realpath(relPath, NULL);
+		if (!absPath) {
+			printf("Failed to resolve path \"%s\" (error %i).\n", relPath, errno);
+			exit(1);
+		}
+		free(relPath);
+		return absPath;
+	}
+}
 
 // add the search path to the provided config struct
 // this should be searched in reverse order
@@ -74,18 +107,18 @@ Config* configParse(int argc, char** argv) {
 	argparse_init(&argparse, options, usages, 0);
 	argc = argparse_parse(&argparse, argc, (const char**) argv);
 
-	config->wordsFile = strdup(config->wordsFile); // necesary, for some reason
+	parseConfigPath(config);
 
-	// if not set, default to the wordlist
-	if (config->solutionsFile == NULL)
+	config->wordsFile = lookupWordlist(config->wordsFile, config);
+
+	// if not set, default to the wordlist (or if they're the same)
+	if (config->solutionsFile == NULL || strcmp(config->solutionsFile, config->wordsFile) == 0)
 		config->solutionsFile = config->wordsFile;
 	else
-		config->solutionsFile = strdup(config->solutionsFile); // again, IDK why I need this
+		config->solutionsFile = lookupWordlist(config->solutionsFile, config);
 
 	if (config->solution)
 		config->solution = strdup(config->solution);
-
-	parseConfigPath(config);
 
 	return config;
 }

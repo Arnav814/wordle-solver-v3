@@ -60,7 +60,7 @@ char* getXdgPath(const char* const envName, const char* const defaultPath) {
 	return baseDir;
 }
 
-FILE* recursivelySearch(const char* const dirname, const char* const filename) {
+char* recursivelySearch(const char* const dirname, const char* const filename) {
 	DIR* dir = opendir(dirname);
 	if (!dir) {
 		printf("Failed to open directory \"%s\" for searching (error %i).\n", dirname, errno);
@@ -76,7 +76,7 @@ FILE* recursivelySearch(const char* const dirname, const char* const filename) {
 		strcat(entryPath, "/");
 		strcat(entryPath, dirEntry->d_name);
 		
-		printf("Opening %s\n", entryPath);
+		// printf("Opening %s\n", entryPath);
 
 		DIR* subdir = opendir(entryPath);
 
@@ -84,7 +84,7 @@ FILE* recursivelySearch(const char* const dirname, const char* const filename) {
 			closedir(subdir);
 
 			// do the recursion
-			FILE* file = recursivelySearch(entryPath, filename);
+			char* file = recursivelySearch(entryPath, filename);
 
 			free(entryPath);
 			if (file) {
@@ -93,16 +93,9 @@ FILE* recursivelySearch(const char* const dirname, const char* const filename) {
 			}
 
 		} else if (errno == ENOTDIR) { // this was actually a file
-			if (strcmp(filename, dirEntry->d_name) == 0) { // FIXME
-				FILE* file = fopen(entryPath, "r");
-				if (!file) {
-					printf("Failed to open file \"%s\" for reading (error %i).\n", entryPath, errno);
-					exit(1);
-				}
-
+			if (strcmp(filename, dirEntry->d_name) == 0) {
 				closedir(dir);
-				free(entryPath);
-				return file;
+				return entryPath;
 			}
 			free(entryPath);
 
