@@ -1,24 +1,35 @@
 #include "wordlist.h"
+#include "fsutils.h"
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 
-char* lookupWordlist(const char* const path, const Config* const config) {
+FILE* lookupWordlist(const char* const path, const Config* const config) {
 	// if the path starts with ./ or ../ it should always be treated as a plain path
 	// this is safe even with 1-char paths, because if the null terminator is found,
 	// the &&s will short-circuit
-	if (path[0] == '.' && (path[1] == '/' || (path[1] == '.' && path[2] == '/')))
-		return strdup(path);
+	if (path[0] == '.' && (path[1] == '/' || (path[1] == '.' && path[2] == '/'))) {
+		FILE* file = fopen(path, "r");
+		if (!file) {
+			printf("Failed to open wordlist \"%s\" (error %i).\n", path, errno);
+			exit(1);
+		}
+		return file;
+	}
 
 	// iterate backwards so entries specified last are searched first
-	for (uint i = config->searchEntries; i >= 0; i--) {
-		
+	for (int i = config->searchEntries - 1; i >= 0; i--) {
+		FILE* file = recursivelySearch(config->searchPath[i], path);
+		if (file) return file;
 	}
+
+	printf("Failed to find wordlist \"%s\".\n", path);
+	exit(1);
 }
 
-Wordlist loadWordlist(const char* const path) {
-	FILE* file = fopen(path, "r");
+Wordlist loadWordlist(FILE* file) {
 	char line[7]; // include the newline char
 
 	uint initialLineCount = 64; // how many words to initially allocate for

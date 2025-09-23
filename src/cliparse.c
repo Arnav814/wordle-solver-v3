@@ -24,7 +24,7 @@ void parseConfigPath(Config* config) {
 			config->searchPath[config->searchEntries++] = entry; } while (false)
 
 	// default paths to check
-	APPEND(strdup("/usr/l"));
+	// APPEND(strdup("/usr/l"));
 
 	// the user has provided a custom path
 	if (userProvided && *userProvided) {
@@ -37,9 +37,9 @@ void parseConfigPath(Config* config) {
 				printf("Paths provided in WORDLIST_PATH must be absolute and not empty, \"%s\" is not.\n", token);
 				exit(1);
 			}
-		}
 
-		APPEND(strdup(token));
+			APPEND(strdup(token));
+		}
 
 		free(toFree);
 	}

@@ -1,5 +1,4 @@
 #include "cache.h"
-#include "fsutils.h"
 #include "wordlist.h"
 #include "algorithm.h"
 #include "userio.h"
@@ -14,12 +13,12 @@ Config* config;
 int main(int argc, char** argv) {
 	config = configParse(argc, argv);
 
-	Wordlist words = loadWordlist(config->wordsFile);
+	Wordlist words = loadWordlist(lookupWordlist(config->wordsFile, config));
 
 	Wordlist solutions;
 	// don't reload the file from disk if it's the same
 	if (strcmp(config->wordsFile, config->solutionsFile) == 0) solutions = copyWordlist(words);
-	else solutions = loadWordlist(config->solutionsFile);
+	else solutions = loadWordlist(lookupWordlist(config->solutionsFile, config));
 	Pattern knownInfo = ANYTHING;
 
 	Cache* cache = cacheInit();
@@ -69,6 +68,7 @@ int main(int argc, char** argv) {
 		char solutionStr[6];
 		solutionStr[5] = 0;
 		pattern2str(solutions.data[0], solutionStr);
+		// TODO: count is wrong if the word wasn't already guessed
 		printf("The solution is %s (%i guesses made).\n", solutionStr, iteration);
 	} else {
 		printf("No more possible solutions. Either the actual solution is not in the provided "
