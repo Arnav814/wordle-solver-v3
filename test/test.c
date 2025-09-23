@@ -1,6 +1,6 @@
 #include "../src/wordlist.h"
 #include "../src/algorithm.h"
-#include "../src/cliparse.h"
+#include "../src/config.h"
 #include "../src/userio.h"
 #include <stdlib.h>
 #include <unity.h>

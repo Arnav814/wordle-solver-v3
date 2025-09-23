@@ -1,7 +1,7 @@
 #ifndef CACHE_H
 #define CACHE_H
 #include "algorithm.h"
-#include "cliparse.h"
+#include "config.h"
 
 // avoid having things that include this also include jansson
 typedef struct Cache Cache;

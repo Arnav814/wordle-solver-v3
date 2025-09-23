@@ -1,6 +1,6 @@
 #ifndef WORDLIST_H
 #define WORDLIST_H
-#include "cliparse.h"
+#include "config.h"
 #include "pattern.h"
 
 typedef struct {

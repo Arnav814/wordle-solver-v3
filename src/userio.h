@@ -1,6 +1,6 @@
 #ifndef USERIO_H
 #define USERIO_H
-#include "cliparse.h"
+#include "config.h"
 #include "pattern.h"
 
 // returns true or false depending on whether the input is valid

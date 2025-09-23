@@ -1,4 +1,4 @@
-#include "cliparse.h"
+#include "config.h"
 #include "fsutils.h"
 #include <errno.h>
 #include <signal.h>

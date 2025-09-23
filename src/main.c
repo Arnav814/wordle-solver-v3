@@ -2,7 +2,7 @@
 #include "wordlist.h"
 #include "algorithm.h"
 #include "userio.h"
-#include "cliparse.h"
+#include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

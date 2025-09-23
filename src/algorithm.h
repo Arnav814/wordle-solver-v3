@@ -1,6 +1,6 @@
 #ifndef ALGORITHM_H
 #define ALGORITHM_H
-#include "cliparse.h"
+#include "config.h"
 #include "pattern.h"
 #include "wordlist.h"
 
