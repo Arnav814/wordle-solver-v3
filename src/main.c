@@ -52,11 +52,11 @@ int main(int argc, char** argv) {
 					solutions.count, (double) guess.score / solutions.count, guess.score);
 
 		Pattern update = readPattern(guess.word, config);
-		// printf("upd:");
-		// printPattern(update);
+		printf("upd:");
+		printPattern(update);
 		knownInfo = composePatterns(knownInfo, update);
-		// printf("new:");
-		// printPattern(knownInfo);
+		printf("new:");
+		printPattern(knownInfo);
 
 		Wordlist newSolutions = filter(knownInfo, solutions);
 		free(solutions.data);

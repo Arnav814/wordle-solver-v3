@@ -8,7 +8,7 @@
 /* Does *not* assume text is null-terminated */
 bool basicValidate(const char* const text) {
 	for (uint i = 0; i < 5; i++) {
-		// the == 0 check will also catch input that is too short
+		// the == 0 check will also catch input that is too short, provided the text is null terminated
 		if (!(text[i] == 'g' || text[i] == 'y' || text[i] == 'n') || text[i] == 0) {
 			return false;
 		}
@@ -19,7 +19,34 @@ bool basicValidate(const char* const text) {
 
 /* Assumes text is null terminated */
 bool validateInput(const char* const text) {
+	// needs null termination to check for extra chars
 	return basicValidate(text) && strlen(text) == 5;
+}
+
+void incrLowerBound(Pattern* const pattern, const uint letter) {
+	for (uint i = 0; i < 4; i++) {
+		bool isSet = pattern->data[5 + i] & letter;
+		if (isSet) {
+			pattern->data[5 + i] &= ~letter; // flip the bit
+			break;
+		}
+	}
+}
+
+// set the upper bound equal to the lower bound
+void setBoundsEqual(Pattern* const pattern, const uint letter) {
+	for (int i = 3; i >= 0; i--) {
+		if (!(pattern->data[5 + i] & letter)) {
+			// if this bit is not set (we've hit the lower bound), backtrack and un-unset the 
+			// previous bit (otherwise we'd completely zero out this letter)
+			if (i != 3) {
+				pattern->data[6 + i] |= letter;
+			}
+			return;
+		} else {
+			pattern->data[5 + i] &= ~letter;
+		}
+	}
 }
 
 Pattern parsePattern(const Pattern word, const char* const text) {
@@ -27,8 +54,8 @@ Pattern parsePattern(const Pattern word, const char* const text) {
 
 	Pattern out = ANYTHING;
 	// have to check before, to remove from the entire pattern without affecting duplicates
-	// Duplicates that are in the guess but not the word will have the first
-	// instance be yellow, and any subsequent instances be gray. Don't remove those.
+	// Duplicates that are in the guess but not the word will have the first instance be yellow,
+	// and any subsequent instances be gray. Don't remove those, so count backwards.
 	for (int i = 4; i >= 0; i--) {
 		if (text[i] == 'n') {
 			for (uint k = 0; k < 5; k++) {
@@ -42,11 +69,18 @@ Pattern parsePattern(const Pattern word, const char* const text) {
 	}
 
 	for (uint i = 0; i < 5; i++) {
-		if (text[i] == 'g')
+		if (text[i] == 'g') {
 			out.data[i] = word.data[i]; // must be exact
-		else if (text[i] == 'y')
-			// anything but the letter, TODO: handle better
+			incrLowerBound(&out, word.data[i]);
+
+		} else if (text[i] == 'y') {
+			// anything but the letter
 			out.data[i] &= ~word.data[i];
+			incrLowerBound(&out, word.data[i]);
+
+		} else { // implies text[i] == 'n'
+			setBoundsEqual(&out, word.data[i]);
+		}
 	}
 
 	return out;

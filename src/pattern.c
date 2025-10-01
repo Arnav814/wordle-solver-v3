@@ -43,11 +43,40 @@ char letter2char(const uint letter) {
 	return ' '; // unreachable, but silences warning
 }
 
+// sets the count bytes on the provided pattern where word is the same as pattern in word format
+// only operates on actual words (one bit set per uint)
+void refreshCounts(Pattern* const pattern, const char* word) {
+	for (uint i = 5; i < 9; i++) {
+		pattern->data[i] = 0;
+	}
+
+	for (uint i = 0; i < 5; i++) {
+		// count indicates the number of occurences
+		// count backward, then see what's first set
+		for (int count = 4; count >= 0; count--) {
+			// if we've gotten all the way to the start
+			if (count == 0) {
+				pattern->data[5 + count] |= char2letter(word[i]); // set the bit
+			// if the bit indicating this count is set
+			} else if ((pattern->data[4 + count] & char2letter(word[i]))) {
+				pattern->data[4 + count] &= ~char2letter(word[i]); // unset this bit
+				if (count != 4) // if we're at the very end, there isn't anything to set
+					pattern->data[5 + count] |= char2letter(word[i]); // set the next one
+				break;
+			}
+		}
+	}
+}
+
 Pattern str2pattern(const char* word) {
-	Pattern pattern = {};
+	Pattern pattern;
+	// set the simple letters part of the pattern
 	for (uint i = 0; i < 5; i++) {
 		pattern.data[i] = char2letter(word[i]);
 	}
+
+	refreshCounts(&pattern, word);
+
 	return pattern;
 }
 
@@ -58,18 +87,25 @@ void pattern2str(const Pattern pattern, char* res) {
 }
 
 void printPattern(const Pattern pattern) {
-	for (uint letterIdx = 0; letterIdx < 5; letterIdx++) {
+	for (uint letterIdx = 0; letterIdx < 9; letterIdx++) {
 		for (int bitIdx = sizeof(uint) * CHAR_BIT - 1; bitIdx >= 0; bitIdx--) {
-			printf("%i", (pattern.data[letterIdx] >> bitIdx) & 1);
+			if ((pattern.data[letterIdx] >> bitIdx) & 1)
+				printf("%c", bitIdx + 'a');
+			else
+				printf("_");
 		}
 		printf(",");
+
+		// enclose the count in parens
+		if (letterIdx == 4) printf("(");
+		else if (letterIdx == 8) printf(")");
 	}
 	printf("\n");
 }
 
 Pattern composePatterns(const Pattern a, const Pattern b) {
 	Pattern out;
-	for (uint i = 0; i < 5; i++) {
+	for (uint i = 0; i < 9; i++) {
 		out.data[i] = a.data[i] & b.data[i];
 	}
 
