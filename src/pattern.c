@@ -1,6 +1,7 @@
 #include "pattern.h"
 #include <assert.h>
 #include <limits.h>
+#include <signal.h>
 #include <stdio.h>
 
 int char2letter(const char c) {
@@ -46,8 +47,8 @@ char letter2char(const uint letter) {
 // sets the count bytes on the provided pattern where word is the same as pattern in word format
 // only operates on actual words (one bit set per uint)
 void refreshCounts(Pattern* const pattern, const char* word) {
-	for (uint i = 5; i < 9; i++) {
-		pattern->data[i] = 0;
+	for (uint i = 0; i < 4; i++) {
+		pattern->counts[i] = 0;
 	}
 
 	for (uint i = 0; i < 5; i++) {
@@ -56,12 +57,12 @@ void refreshCounts(Pattern* const pattern, const char* word) {
 		for (int count = 4; count >= 0; count--) {
 			// if we've gotten all the way to the start
 			if (count == 0) {
-				pattern->data[5 + count] |= char2letter(word[i]); // set the bit
+				pattern->counts[count] |= char2letter(word[i]); // set the bit
 			// if the bit indicating this count is set
-			} else if ((pattern->data[4 + count] & char2letter(word[i]))) {
-				pattern->data[4 + count] &= ~char2letter(word[i]); // unset this bit
+			} else if ((pattern->counts[count - 1] & char2letter(word[i]))) {
+				pattern->counts[count - 1] &= ~char2letter(word[i]); // unset this bit
 				if (count != 4) // if we're at the very end, there isn't anything to set
-					pattern->data[5 + count] |= char2letter(word[i]); // set the next one
+					pattern->counts[count] |= char2letter(word[i]); // set the next one
 				break;
 			}
 		}
@@ -86,28 +87,73 @@ void pattern2str(const Pattern pattern, char* res) {
 	}
 }
 
-void printPattern(const Pattern pattern) {
-	for (uint letterIdx = 0; letterIdx < 9; letterIdx++) {
-		for (int bitIdx = sizeof(uint) * CHAR_BIT - 1; bitIdx >= 0; bitIdx--) {
-			if ((pattern.data[letterIdx] >> bitIdx) & 1)
-				printf("%c", bitIdx + 'a');
-			else
-				printf("_");
-		}
-		printf(",");
-
-		// enclose the count in parens
-		if (letterIdx == 4) printf("(");
-		else if (letterIdx == 8) printf(")");
+// print a single uint from a pattern
+void printChar(const uint letter) {
+	for (int bitIdx = sizeof(uint) * CHAR_BIT - 1; bitIdx >= 0; bitIdx--) {
+		if ((letter >> bitIdx) & 1)
+			printf("%c", bitIdx + 'a');
+		else
+			printf("_");
 	}
+}
+
+void printPattern(const Pattern pattern) {
+	for (uint letterIdx = 0; letterIdx < 5; letterIdx++) {
+		printChar(pattern.data[letterIdx]);
+		printf(",");
+	}
+
+	// enclose the count in parens
+	printf("(");
+	for (uint countIdx = 0; countIdx < 4; countIdx++) {
+		printChar(pattern.counts[countIdx]);
+		printf(",");
+	}
+	printf(")");
+
 	printf("\n");
 }
 
 Pattern composePatterns(const Pattern a, const Pattern b) {
 	Pattern out;
-	for (uint i = 0; i < 9; i++) {
+	for (uint i = 0; i < 5; i++) {
 		out.data[i] = a.data[i] & b.data[i];
+	}
+	for (uint i = 0; i < 4; i++) {
+		out.counts[i] = a.counts[i] & b.counts[i];
 	}
 
 	return out;
 }
+
+void incrLowerBound(Pattern* const pattern, const uint letter) {
+	printf("ilb:%c\n", letter2char(letter));
+
+	for (uint i = 0; i < 4; i++) {
+		// find the first unset (allowed) bit
+		if (!(pattern->counts[i] & letter)) {
+			pattern->counts[i] |= letter; // set (disallow) the bit
+			return;
+		}
+	}
+}
+
+// set the upper bound equal to the lower bound
+void setBoundsEqual(Pattern* const pattern, const uint letter) {
+	printf("sbe:%c\n", letter2char(letter));
+
+	// don't loop to 0 inclusive because if 0 is the lower bound we don't want to change it
+	for (int i = 3; i > 0; i--) {
+		// find last disallowed bit (1 beyond lower bound)
+		if (pattern->counts[i] & letter) {
+			// if this bit is disallowed (we've hit the lower bound), backtrack and allow the 
+			// previous bit (otherwise we'd completely disallow this letter)
+			if (i != 3) pattern->counts[i + 1] &= ~letter;
+			return;
+		} else {
+			// disallow everything else
+			pattern->counts[i] |= letter;
+		}
+	}
+}
+

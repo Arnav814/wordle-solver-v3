@@ -11,6 +11,28 @@
 Config* config;
 
 int main(int argc, char** argv) {
+
+	Pattern p = ANYTHING;
+	printPattern(p);
+	incrLowerBound(&p, char2letter('a'));
+	incrLowerBound(&p, char2letter('a'));
+	incrLowerBound(&p, char2letter('a'));
+	incrLowerBound(&p, char2letter('m'));
+	// setBoundsEqual(&p, char2letter('m'));
+	setBoundsEqual(&p, char2letter('b'));
+	printPattern(p);
+
+	// Pattern word = str2pattern("annal");
+	// Pattern solution = str2pattern("banal");
+	// Pattern p = simGuess(word, solution);
+
+	// printPattern(word);
+	// printPattern(solution);
+	// printPattern(p);
+	// printf("%d\n", checkPattern(p, solution));
+
+	return 0;
+
 	config = configParse(argc, argv);
 
 	Wordlist words = loadWordlist(config->wordsFile);

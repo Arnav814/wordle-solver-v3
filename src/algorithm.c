@@ -68,10 +68,10 @@ Pattern simGuess(const Pattern guess, Pattern solution) {
 		}
 	}
 
-	// char resStr[6];
-	// resStr[5] = 0;
-	// memcpy(resStr, result, 5);
-	// printf("%s\n", resStr);
+	char resStr[6];
+	resStr[5] = 0;
+	memcpy(resStr, result, 5);
+	printf("%s\n", resStr);
 
 	return parsePattern(guess, result);
 }

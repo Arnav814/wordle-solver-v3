@@ -23,32 +23,6 @@ bool validateInput(const char* const text) {
 	return basicValidate(text) && strlen(text) == 5;
 }
 
-void incrLowerBound(Pattern* const pattern, const uint letter) {
-	for (uint i = 0; i < 4; i++) {
-		bool isSet = pattern->data[5 + i] & letter;
-		if (isSet) {
-			pattern->data[5 + i] &= ~letter; // flip the bit
-			break;
-		}
-	}
-}
-
-// set the upper bound equal to the lower bound
-void setBoundsEqual(Pattern* const pattern, const uint letter) {
-	for (int i = 3; i >= 0; i--) {
-		if (!(pattern->data[5 + i] & letter)) {
-			// if this bit is not set (we've hit the lower bound), backtrack and un-unset the 
-			// previous bit (otherwise we'd completely zero out this letter)
-			if (i != 3) {
-				pattern->data[6 + i] |= letter;
-			}
-			return;
-		} else {
-			pattern->data[5 + i] &= ~letter;
-		}
-	}
-}
-
 Pattern parsePattern(const Pattern word, const char* const text) {
 	assert(basicValidate(text));
 
@@ -78,9 +52,13 @@ Pattern parsePattern(const Pattern word, const char* const text) {
 			out.data[i] &= ~word.data[i];
 			incrLowerBound(&out, word.data[i]);
 
-		} else { // implies text[i] == 'n'
-			setBoundsEqual(&out, word.data[i]);
 		}
+	}
+
+	// do after so that all lower bound are set correctly
+	for (uint i = 0; i < 5; i++) {
+		if (text[i] == 'n')
+			setBoundsEqual(&out, word.data[i]);
 	}
 
 	return out;
