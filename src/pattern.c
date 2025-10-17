@@ -43,11 +43,41 @@ char letter2char(const uint letter) {
 	return ' '; // unreachable, but silences warning
 }
 
+// sets the count bytes on the provided pattern where word is the same as pattern in word format
+// only operates on actual words (only one bit set per element)
+void refreshCounts(Pattern* const pattern, const char* word) {
+	pattern->counts[0] = ANY_LETTER; // start with 0 of all letters
+	for (uint i = 1; i < 4; i++) {
+		pattern->counts[i] = 0;
+	}
+
+	for (uint i = 0; i < 5; i++) {
+		// count indicates the number of occurences
+		// count backward, then see what's first set
+		for (int count = 4; count >= 0; count--) {
+			// if we've gotten all the way to the start
+			if (count == 0) {
+				pattern->counts[count] |= char2letter(word[i]); // set the bit
+			// if the bit indicating this count is set
+			} else if ((pattern->counts[count - 1] & char2letter(word[i]))) {
+				pattern->counts[count - 1] &= ~char2letter(word[i]); // unset this bit
+				if (count != 4) // if we're at the very end, there isn't anything to set
+					pattern->counts[count] |= char2letter(word[i]); // set the next one
+				break;
+			}
+		}
+	}
+}
+
 Pattern str2pattern(const char* word) {
-	Pattern pattern = {};
+	Pattern pattern;
+	// set the simple letters part of the pattern
 	for (uint i = 0; i < 5; i++) {
 		pattern.data[i] = char2letter(word[i]);
 	}
+
+	refreshCounts(&pattern, word);
+
 	return pattern;
 }
 
@@ -57,13 +87,30 @@ void pattern2str(const Pattern pattern, char* res) {
 	}
 }
 
+// print a single uint from a pattern
+void printChar(const uint letter) {
+	for (int bitIdx = sizeof(uint) * CHAR_BIT - 1; bitIdx >= 0; bitIdx--) {
+		if ((letter >> bitIdx) & 1)
+			printf("%c", bitIdx + 'a');
+		else
+			printf("_");
+	}
+}
+
 void printPattern(const Pattern pattern) {
 	for (uint letterIdx = 0; letterIdx < 5; letterIdx++) {
-		for (int bitIdx = sizeof(uint) * CHAR_BIT - 1; bitIdx >= 0; bitIdx--) {
-			printf("%i", (pattern.data[letterIdx] >> bitIdx) & 1);
-		}
+		printChar(pattern.data[letterIdx]);
 		printf(",");
 	}
+
+	// enclose the count in parens
+	printf("(");
+	for (uint countIdx = 0; countIdx < 4; countIdx++) {
+		printChar(pattern.counts[countIdx]);
+		printf(",");
+	}
+	printf(")");
+
 	printf("\n");
 }
 
@@ -72,6 +119,36 @@ Pattern composePatterns(const Pattern a, const Pattern b) {
 	for (uint i = 0; i < 5; i++) {
 		out.data[i] = a.data[i] & b.data[i];
 	}
+	for (uint i = 0; i < 4; i++) {
+		out.counts[i] = a.counts[i] | b.counts[i];
+	}
 
 	return out;
 }
+
+void incrLowerBound(Pattern* const pattern, const uint letter) {
+	for (uint i = 0; i < 4; i++) {
+		// find the first unset (allowed) bit
+		if (!(pattern->counts[i] & letter)) {
+			pattern->counts[i] |= letter; // set (disallow) the bit
+			return;
+		}
+	}
+}
+
+// set the upper bound equal to the lower bound
+void setBoundsEqual(Pattern* const pattern, const uint letter) {
+	for (int i = 3; i >= 0; i--) {
+		// find last disallowed bit (1 beyond lower bound)
+		if (pattern->counts[i] & letter || i == 0) {
+			// if this bit is disallowed (we've hit the lower bound), backtrack and allow the 
+			// previous bit (otherwise we'd completely disallow this letter)
+			if (i != 3) pattern->counts[i + 1] &= ~letter;
+			return;
+		} else {
+			// disallow everything else
+			pattern->counts[i] |= letter;
+		}
+	}
+}
+
