@@ -83,7 +83,7 @@ void parseConfigPath(Config* config) {
 
 Config* configParse(int argc, char** argv) {
 	Config* config = calloc(1, sizeof(Config));
-	config->wordsFile = "../wordlists/wordlist.txt";
+	config->wordsFile = "../wordlists/long.txt";
 	config->solutionsFile = NULL; // set default later, in case wordsFile is changed
 	config->jobs = 1;
 	config->verbosity = 1;
