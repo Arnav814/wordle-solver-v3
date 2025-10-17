@@ -20,6 +20,8 @@ as a plain path and this logic doesn't apply.
 Building
 --------
 
+Install libncurses (`libncurses-dev` on Debian). Then run these commands.
+
 ```bash
 mkdir build
 cd build
