@@ -57,7 +57,7 @@ static inline bool checkPattern(const Pattern pattern, const Pattern word) {
 			return false;
 	}
 	for (uint i = 0; i < 4; i++) {
-		if ((pattern.counts[i] & word.counts[i]) == 0)
+		if ((pattern.counts[i] & word.counts[i]) != 0)
 			return false;
 	}
 	return true;

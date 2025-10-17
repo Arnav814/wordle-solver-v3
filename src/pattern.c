@@ -1,7 +1,6 @@
 #include "pattern.h"
 #include <assert.h>
 #include <limits.h>
-#include <signal.h>
 #include <stdio.h>
 
 int char2letter(const char c) {
@@ -45,9 +44,10 @@ char letter2char(const uint letter) {
 }
 
 // sets the count bytes on the provided pattern where word is the same as pattern in word format
-// only operates on actual words (one bit set per uint)
+// only operates on actual words (only one bit set per element)
 void refreshCounts(Pattern* const pattern, const char* word) {
-	for (uint i = 0; i < 4; i++) {
+	pattern->counts[0] = ANY_LETTER; // start with 0 of all letters
+	for (uint i = 1; i < 4; i++) {
 		pattern->counts[i] = 0;
 	}
 
@@ -120,15 +120,13 @@ Pattern composePatterns(const Pattern a, const Pattern b) {
 		out.data[i] = a.data[i] & b.data[i];
 	}
 	for (uint i = 0; i < 4; i++) {
-		out.counts[i] = a.counts[i] & b.counts[i];
+		out.counts[i] = a.counts[i] | b.counts[i];
 	}
 
 	return out;
 }
 
 void incrLowerBound(Pattern* const pattern, const uint letter) {
-	printf("ilb:%c\n", letter2char(letter));
-
 	for (uint i = 0; i < 4; i++) {
 		// find the first unset (allowed) bit
 		if (!(pattern->counts[i] & letter)) {
@@ -140,12 +138,9 @@ void incrLowerBound(Pattern* const pattern, const uint letter) {
 
 // set the upper bound equal to the lower bound
 void setBoundsEqual(Pattern* const pattern, const uint letter) {
-	printf("sbe:%c\n", letter2char(letter));
-
-	// don't loop to 0 inclusive because if 0 is the lower bound we don't want to change it
-	for (int i = 3; i > 0; i--) {
+	for (int i = 3; i >= 0; i--) {
 		// find last disallowed bit (1 beyond lower bound)
-		if (pattern->counts[i] & letter) {
+		if (pattern->counts[i] & letter || i == 0) {
 			// if this bit is disallowed (we've hit the lower bound), backtrack and allow the 
 			// previous bit (otherwise we'd completely disallow this letter)
 			if (i != 3) pattern->counts[i + 1] &= ~letter;

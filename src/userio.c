@@ -27,6 +27,7 @@ Pattern parsePattern(const Pattern word, const char* const text) {
 	assert(basicValidate(text));
 
 	Pattern out = ANYTHING;
+
 	// have to check before, to remove from the entire pattern without affecting duplicates
 	// Duplicates that are in the guess but not the word will have the first instance be yellow,
 	// and any subsequent instances be gray. Don't remove those, so count backwards.
