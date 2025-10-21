@@ -60,11 +60,12 @@ char* getXdgPath(const char* const envName, const char* const defaultPath) {
 	return baseDir;
 }
 
-char* recursivelySearch(const char* const dirname, const char* const filename) {
+char* recursivelySearch(const char* const dirname, const char* const filename, const Config* const config) {
 	DIR* dir = opendir(dirname);
 	if (!dir) {
-		printf("Failed to open directory \"%s\" for searching (error %i).\n", dirname, errno);
-		exit(1);
+		if (config->verbosity >= 3)
+			printf("Failed to open directory \"%s\" for searching (error %i).\n", dirname, errno);
+		return NULL;
 	}
 
 	errno = 0;
@@ -84,7 +85,7 @@ char* recursivelySearch(const char* const dirname, const char* const filename) {
 			closedir(subdir);
 
 			// do the recursion
-			char* file = recursivelySearch(entryPath, filename);
+			char* file = recursivelySearch(entryPath, filename, config);
 
 			free(entryPath);
 			if (file) {

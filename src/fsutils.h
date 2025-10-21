@@ -1,8 +1,8 @@
 #ifndef FSUTILS_H
 #define FSUTILS_H
 
+#include "config.h"
 #include <dirent.h>
-#include <stdio.h>
 #include <time.h>
 
 // gets the modification time of the file at path in seconds, crashing if the file doesn't exist
@@ -16,6 +16,6 @@ char* getXdgPath(const char* const envName, const char* const defaultPath);
 
 // recursively search dir for filename, returning null if nothing is found, otherwise returns file
 // path, newly malloc'ed
-char* recursivelySearch(const char* const dirname, const char* const filename);
+char* recursivelySearch(const char* const dirname, const char* const filename, const Config* const config);
 
 #endif /* FSUTILS_H */

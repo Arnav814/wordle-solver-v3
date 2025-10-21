@@ -20,6 +20,7 @@ CPMAddPackage(
 	GITHUB_REPOSITORY doches/progressbar
 	GIT_TAG ac56232610abf58cc2db2bc86efc8fcba7dfe8c2
 	VERSION 0.1 # doesn't actually have versions, so this is a placeholder
+	EXCLUDE_FROM_ALL yes
 )
 # fix progressbar's broken CMake config
 target_link_libraries(progressbar PUBLIC ${CURSES_LIBRARIES})
@@ -29,6 +30,7 @@ CPMAddPackage(
 	GITHUB_REPOSITORY Mashpoe/c-hashmap
 	GIT_TAG 98bbfe006640a411a9d8c949a46a712edbbbf891
 	VERSION 1.1 # again, a placeholder version
+	EXCLUDE_FROM_ALL yes
 )
 # has no cmakelists, so we have to do it ourselves
 add_library(c_hashmap ${c_hashmap_SOURCE_DIR}/map.c)
@@ -38,6 +40,7 @@ CPMAddPackage(
 	GITHUB_REPOSITORY cofyc/argparse
 	GIT_TAG 5559200a91a334e15391e8285571145f6b6cc002
 	VERSION 2.0 # grabbed from main, no actual version 2.0 exists
+	EXCLUDE_FROM_ALL yes
 	OPTIONS "ARGPARSE_SHARED OFF"
 )
 
@@ -46,6 +49,7 @@ CPMAddPackage(
 	GITHUB_REPOSITORY akheron/jansson
 	GIT_TAG 154f8919fb0d3778282b797789ad985e3d99fdc8
 	VERSION 2.14.1.2 # not a release, grabbed from master to get unreleased CMake config fixes
+	EXCLUDE_FROM_ALL yes
 	OPTIONS
 		"JANSSON_BUILD_DOCS OFF"
 		"JANSSON_BUILD_SHARED_LIBS OFF"
@@ -58,6 +62,7 @@ CPMAddPackage(
 	NAME Unity
 	GITHUB_REPOSITORY ThrowTheSwitch/Unity
 	VERSION 2.6.1
+	EXCLUDE_FROM_ALL yes
 )
 
 # all the files that don't have main functions
@@ -95,4 +100,9 @@ target_link_libraries(test-bin modules)
 target_link_libraries(test-bin unity::framework)
 
 add_custom_target(test COMMAND ${CMAKE_CURRENT_BINARY_DIR}/test-bin)
+
+# packaging stuff
+
+install(TARGETS wordlebot DESTINATION bin)
+install(DIRECTORY wordlists DESTINATION share/wordlebot3)
 

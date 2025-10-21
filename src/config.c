@@ -19,7 +19,7 @@ char* lookupWordlist(const char* const path, const Config* const config) {
 	} else {
 		// iterate backwards so entries specified last are searched first
 		for (int i = config->searchEntries - 1; i >= 0; i--) {
-			relPath = recursivelySearch(config->searchPath[i], path);
+			relPath = recursivelySearch(config->searchPath[i], path, config);
 			if (relPath) break;
 		}
 	}
@@ -57,7 +57,8 @@ void parseConfigPath(Config* config) {
 			config->searchPath[config->searchEntries++] = entry; } while (false)
 
 	// default paths to check
-	// APPEND(strdup("/usr/l"));
+	APPEND(strdup("/usr/local/wordlebot3"));
+	APPEND(strdup("/usr/local/share/wordlebot3"));
 
 	// the user has provided a custom path
 	if (userProvided && *userProvided) {
