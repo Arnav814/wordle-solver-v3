@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.29)
-project(wordlebot LANGUAGES C)
+project(wordlebot LANGUAGES C HOMEPAGE_URL "https://github.com/Arnav814/wordle-solver-v3")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -103,6 +103,12 @@ add_custom_target(test COMMAND ${CMAKE_CURRENT_BINARY_DIR}/test-bin)
 
 # packaging stuff
 
-install(TARGETS wordlebot DESTINATION bin)
-install(DIRECTORY wordlists DESTINATION share/wordlebot3)
+include(GNUInstallDirs)
+
+# TODO: use /usr/games instead
+install(TARGETS wordlebot DESTINATION "${CMAKE_INSTALL_BINDIR}")
+install(DIRECTORY wordlists DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/wordlebot3")
+
+include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/MyCPackOptions.cmake")
+include(CPack)
 

@@ -1,7 +1,6 @@
 #include "config.h"
 #include "fsutils.h"
 #include <errno.h>
-#include <signal.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -84,7 +83,7 @@ void parseConfigPath(Config* config) {
 
 Config* configParse(int argc, char** argv) {
 	Config* config = calloc(1, sizeof(Config));
-	config->wordsFile = "../wordlists/long.txt";
+	config->wordsFile = "long.txt";
 	config->solutionsFile = NULL; // set default later, in case wordsFile is changed
 	config->jobs = 1;
 	config->verbosity = 1;
