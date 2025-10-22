@@ -8,6 +8,7 @@ set(CPACK_BINARY_TGZ "ON")
 set(CPACK_BINARY_TZ "ON")
 
 set(CPACK_PACKAGE_CONTACT "https://github.com/Arnav814")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A simple wordle solver.")
 
 set(CPACK_DEBIAN_PACKAGE_SECTION "games")
 set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")

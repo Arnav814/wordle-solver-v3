@@ -56,7 +56,7 @@ void parseConfigPath(Config* config) {
 			config->searchPath[config->searchEntries++] = entry; } while (false)
 
 	// default paths to check
-	APPEND(strdup("/usr/local/wordlebot3"));
+	APPEND(strdup("/usr/share/wordlebot3"));
 	APPEND(strdup("/usr/local/share/wordlebot3"));
 
 	// the user has provided a custom path
