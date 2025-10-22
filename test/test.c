@@ -12,24 +12,11 @@ Wordlist mediumList;
 Wordlist longList;
 
 void setUp(void) {
-	// configParse may modify the arguments, so keep references so they can be freed
-	void* ptr1 = malloc(sizeof(char*));
-	void* ptr2 = malloc(sizeof(""));
-
-	// empty argc and argv
-	int argc = 1;
-	char** argv = ptr1;
-	argv[0] = ptr2;
-	*argv[0] = 0;
-
-	config = configParse(argc, argv);
-
-	free(ptr1);
-	free(ptr2);
+	config = debugConfig();
 
 	shortList = loadWordlist("../wordlists/short.txt");
 	mediumList = loadWordlist("../wordlists/medium.txt");
-	longList = loadWordlist("../wordlists/wordlist.txt");
+	longList = loadWordlist("../wordlists/long.txt");
 }
 
 void tearDown(void) {

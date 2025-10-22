@@ -23,6 +23,9 @@ typedef struct {
 // returns the filename or crashes if the file can't be found
 char* lookupWordlist(const char* const path, const Config* const config);
 
+// replaces configParse for unit testing
+Config* debugConfig();
+
 // argv is modified and unusable after this; make a copy if needed
 Config* configParse(const int argc, char** argv);
 

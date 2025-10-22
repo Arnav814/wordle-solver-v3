@@ -1,5 +1,4 @@
 #include "wordlist.h"
-#include "fsutils.h"
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>

@@ -81,6 +81,13 @@ void parseConfigPath(Config* config) {
 #	undef APPEND
 }
 
+Config* debugConfig() {
+	Config* config = calloc(1, sizeof(Config));
+	config->jobs = 1;
+	config->verbosity = 1;
+	return config;
+}
+
 Config* configParse(int argc, char** argv) {
 	Config* config = calloc(1, sizeof(Config));
 	config->wordsFile = "long.txt";
