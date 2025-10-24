@@ -33,6 +33,9 @@ char* lookupWordlist(const char* const path, const Config* const config) {
 			exit(1);
 		}
 		free(relPath);
+
+		if (config->verbosity >= 4)
+			printf("Using \"%s\" for specified wordlist \"%s\".\n", absPath, path);
 		return absPath;
 	}
 }
