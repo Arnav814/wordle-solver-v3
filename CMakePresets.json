@@ -14,7 +14,7 @@
 			"generator": "Unix Makefiles",
 			"binaryDir": "${sourceDir}/build",
 			"cacheVariables": {
-				"MY_COMPILE_OPTS": "-Wall -Wextra -Wundef -Wswitch-enum -Wmissing-field-initializers $env{CXX_ISERROR} $env{CXX_SANITIZE} $env{CXX_OPTIMIZATION} $env{CXX_DEBUG} $env{CXX_PROFILE}"
+				"MY_COMPILE_OPTS": "-Wall -Wextra -Wundef -Wswitch-enum -Wmissing-field-initializers $env{CXX_SANITIZE} $env{CXX_OPTIMIZATION} $env{CXX_DEBUG} $env{CXX_PROFILE}"
 			}
 		},
 		{
@@ -26,8 +26,7 @@
 				"dev": false
 			},
 			"environment": {
-				"CXX_OPTIMIZATION": "-O3",
-				"CXX_ISERROR": "-Werror"
+				"CXX_OPTIMIZATION": "-O3"
 			}
 		},
 		{
