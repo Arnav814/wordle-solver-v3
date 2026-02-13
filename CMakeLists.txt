@@ -70,7 +70,7 @@ add_library(modules)
 include("src/filelist.cmake")
 
 # supply config here, so it propagates to both targets
-target_compile_features(modules PUBLIC c_std_23)
+target_compile_features(modules PUBLIC c_std_11)
 target_link_libraries(modules progressbar)
 target_link_libraries(modules c_hashmap)
 target_link_libraries(modules argparse_static)
