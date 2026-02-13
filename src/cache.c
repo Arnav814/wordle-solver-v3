@@ -139,7 +139,7 @@ json_t* findEntry(const Cache* const cache, const Config* const config, const
 }
 
 BestWord cacheGet(const Cache* const cache, const Config* const config) {
-	json_auto_t* entry = findEntry(cache, config, true, NULL);
+	json_t* entry = findEntry(cache, config, true, NULL);
 
 	// if the entry isn't in the cache
 	if (!entry) {
@@ -147,8 +147,8 @@ BestWord cacheGet(const Cache* const cache, const Config* const config) {
 		return out;
 	}
 
-	json_auto_t* word = json_object_get(entry, "word");
-	json_auto_t* score = json_object_get(entry, "score");
+	json_t* word = json_object_get(entry, "word");
+	json_t* score = json_object_get(entry, "score");
 
 	if (!word || !score) {
 		printf("Missing attributes in cache entry.\n");
@@ -170,6 +170,10 @@ BestWord cacheGet(const Cache* const cache, const Config* const config) {
 	}
 
 	BestWord out = {str2pattern(wordStr), scoreNum};
+	json_decref(entry);
+	json_decref(word);
+	json_decref(score);
+
 	return out;
 }
 
@@ -200,7 +204,7 @@ void writeCache(const Cache* const cache) {
 }
 
 void cacheSet(Cache* const cache, const Config* const config, const BestWord word) {
-	json_auto_t* newEntry = json_object();
+	json_t* newEntry = json_object();
 	json_object_set_new(newEntry, "wlist", json_string(config->wordsFile));
 	json_object_set_new(newEntry, "slist", json_string(config->solutionsFile));
 	json_object_set_new(newEntry, "wmtime", json_integer(getMTime(config->wordsFile)));
@@ -213,12 +217,14 @@ void cacheSet(Cache* const cache, const Config* const config, const BestWord wor
 	json_object_set_new(newEntry, "word", json_string(wordAsStr));
 
 	size_t index;
-	json_auto_t* oldEntry = findEntry(cache, config, false, &index);
+	json_t* oldEntry = findEntry(cache, config, false, &index);
 
 	if (oldEntry) // remove the old entry, if it exists
 		json_array_remove(cache->cache, index);
 
 	json_array_append(cache->cache, newEntry);
+	json_decref(newEntry);
+	json_decref(oldEntry);
 	writeCache(cache);
 }
 
