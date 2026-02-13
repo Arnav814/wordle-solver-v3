@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.29)
+cmake_minimum_required(VERSION 3.20)
 project(wordlebot LANGUAGES C HOMEPAGE_URL "https://github.com/Arnav814/wordle-solver-v3")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
