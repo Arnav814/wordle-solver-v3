@@ -81,6 +81,10 @@ Pattern readPattern(const Pattern word, const Config* const config) {
 
 		char* input;
 		scanf("%ms", &input);
+		if (input == NULL) {
+			printf("Error, couldn't read input.\n");
+			exit(1);
+		}
 		inputIsValid = validateInput(input);
 
 		if (inputIsValid) {
