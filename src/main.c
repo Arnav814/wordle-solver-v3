@@ -22,6 +22,7 @@ int main(int argc, char** argv) {
 	Pattern knownInfo = ANYTHING;
 
 	Cache* cache = cacheInit();
+	char lastGuess[6] = {0};
 
 	uint iteration = 0; // count guess # from 0
 	while (solutions.count > 1) {
@@ -51,8 +52,8 @@ int main(int argc, char** argv) {
 					"to have ~%.2f possible solutions (score: %lu).\n",
 					solutions.count, (double) guess.score / solutions.count, guess.score);
 
-		char wordStr[6] = {0};
-		pattern2str(guess.word, wordStr);
+		lastGuess[5] = 0;
+		pattern2str(guess.word, lastGuess);
 
 		Pattern update = readPattern(guess.word, config);
 		knownInfo = composePatterns(knownInfo, update);
@@ -73,7 +74,9 @@ int main(int argc, char** argv) {
 		char solutionStr[6];
 		solutionStr[5] = 0;
 		pattern2str(solutions.data[0], solutionStr);
-		// TODO: count is wrong if the word wasn't already guessed
+
+		// if we already guessed the correct word by chance, don't count another word
+		if (strcmp(lastGuess, solutionStr) != 0) iteration++;
 		printf("The solution is %s (%i guesses made).\n", solutionStr, iteration);
 	} else {
 		printf("No more possible solutions. Either the actual solution is not in the provided "
