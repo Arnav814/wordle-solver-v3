@@ -7,6 +7,7 @@ target_sources(modules PRIVATE
 	"./src/config.c"
 	"./src/fsutils.c"
 	"./src/pattern.c"
+	"./src/solver.c"
 	"./src/userio.c"
 	"./src/wordlist.c"
 )
