@@ -65,50 +65,42 @@ CPMAddPackage(
 	EXCLUDE_FROM_ALL yes
 )
 
+find_package(Python COMPONENTS Development.Module)
+
 # all the files that don't have main functions
-add_library(modules)
+add_library(internal)
 include("src/filelist.cmake")
 
 # supply config here, so it propagates to both targets
-target_compile_features(modules PUBLIC c_std_11)
-target_link_libraries(modules progressbar)
-target_link_libraries(modules c_hashmap)
-target_link_libraries(modules argparse_static)
-target_link_libraries(modules jansson)
-target_include_directories(modules PRIVATE ${progressbar_SOURCE_DIR}/include)
+target_compile_features(internal PUBLIC c_std_11)
+target_link_libraries(internal progressbar)
+target_link_libraries(internal c_hashmap)
+target_link_libraries(internal argparse_static)
+target_link_libraries(internal jansson)
+target_link_libraries(internal Python::Module)
+target_include_directories(internal PRIVATE ${progressbar_SOURCE_DIR}/include)
 # also has other files, but is the least messy solution
-target_include_directories(modules PRIVATE ${c_hashmap_SOURCE_DIR})
-target_include_directories(modules PRIVATE ${argparse_SOURCE_DIR})
+target_include_directories(internal PRIVATE ${c_hashmap_SOURCE_DIR})
+target_include_directories(internal PRIVATE ${argparse_SOURCE_DIR})
 
 if (DEFINED MY_COMPILE_OPTS) # defined by CMakePresets.json sometimes
 	separate_arguments(MY_CXX_FLAGS UNIX_COMMAND ${MY_COMPILE_OPTS})
 else()
 	set(MY_CXX_FLAGS -Wall -Wextra) # turn common warnings on
 	# some presets override this
-	target_compile_options(modules PUBLIC "$<$<CONFIG:DEBUG>:-O2>")
-	target_compile_options(modules PUBLIC "$<$<CONFIG:RELEASE>:-O3>")
-	target_compile_options(modules PUBLIC "$<$<CONFIG:RELWITHDEBINFO>:-O3>")
+	target_compile_options(internal PUBLIC "$<$<CONFIG:DEBUG>:-O2>")
+	target_compile_options(internal PUBLIC "$<$<CONFIG:RELEASE>:-O3>")
+	target_compile_options(internal PUBLIC "$<$<CONFIG:RELWITHDEBINFO>:-O3>")
 endif()
-target_compile_options(modules PUBLIC ${MY_CXX_FLAGS})
-target_link_options(modules PUBLIC ${MY_CXX_FLAGS})
+target_compile_options(internal PUBLIC ${MY_CXX_FLAGS})
+target_link_options(internal PUBLIC ${MY_CXX_FLAGS})
 
-add_executable(wordlebot src/main.c)
-target_link_libraries(wordlebot modules)
+add_library(wordlemodule SHARED ${CMAKE_CURRENT_SOURCE_DIR}/src/wordlemodule.c)
+target_link_libraries(wordlemodule internal)
 
-add_executable(test-bin test/test.c)
-target_link_libraries(test-bin modules)
+add_executable(test-bin ${CMAKE_CURRENT_SOURCE_DIR}/test/test.c)
+target_link_libraries(test-bin internal)
 target_link_libraries(test-bin unity::framework)
 
 add_custom_target(test COMMAND ${CMAKE_CURRENT_BINARY_DIR}/test-bin)
-
-# packaging stuff
-
-include(GNUInstallDirs)
-
-# TODO: use /usr/games instead
-install(TARGETS wordlebot DESTINATION "${CMAKE_INSTALL_BINDIR}")
-install(DIRECTORY wordlists DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/wordlebot3")
-
-include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/MyCPackOptions.cmake")
-include(CPack)
 

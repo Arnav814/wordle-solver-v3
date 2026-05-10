@@ -5,6 +5,10 @@
 *.cache
 /compile_commands.json
 
+# python stuff
+venv
+.venv
+
 # vim stuff
 *.sw?
 
