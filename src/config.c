@@ -1,13 +1,14 @@
 #include "config.h"
+#include "argparse.h"
 #include "fsutils.h"
 #include <errno.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <argparse.h>
 #include <string.h>
 
+// always returns a new string
 char* lookupWordlist(const char* const path, const Config* const config) {
 	char* relPath = NULL; // relative path (may contain ., .., or symlinks)
 	
@@ -94,29 +95,27 @@ Config* debugConfig() {
 
 Config* configParse(int argc, char** argv) {
 	Config* config = calloc(1, sizeof(Config));
-	config->wordsFile = "long.txt";
-	config->solutionsFile = NULL; // set default later, in case wordsFile is changed
-	config->jobs = 1;
-	config->verbosity = 1;
-	config->solution = NULL;
 
-	struct argparse_option options[] = {
-		OPT_HELP(),
-		OPT_STRING('w', "words", &config->wordsFile, "File for all guessable words.", NULL, 0, 0),
-		OPT_STRING('s', "solutions", &config->solutionsFile, "File for all possible solutions.", NULL, 0, 0),
-		OPT_INTEGER('j', "jobs", &config->jobs, "Number of threads to use.", NULL, 0, 0),
-		OPT_INTEGER('v', "verbosity", &config->verbosity, "How verbose to be from 0 to 3.", NULL, 0, 0),
-		OPT_STRING('a', "autoscore", &config->solution, "Assume this word is the solution and run without input.", NULL, 0, 0),
-		OPT_END(),
-	};
-	const char* const usages[] = {
-		"prog [options]",
-		NULL,
+	ArgDef options[] = {
+		{Flag, 'h', "help", "Show this help message."},
+		{Path, 'w', "words", "File for all guessable words."},
+		{Path, 's', "solutions", "File for all possible solutions."},
+		{ULong, 'j', "jobs", "Number of threads to use."},
+		{Count, 'v', "verbosity", "How verbose to be from 0 to 3."},
+		{String, 'a', "autoscore", "Assume this word is the solution and run without input."},
 	};
 
-	struct argparse argparse;
-	argparse_init(&argparse, options, usages, 0);
-	argc = argparse_parse(&argparse, argc, (const char**) argv);
+	ArgsParsed* args = argsParse(sizeof(options) / sizeof(ArgDef), options, argc, argv);
+	if (getPositionalCount(args) != 0) {
+		printf("Unexpected positional argument \"%s\"\n", getPositional(args, 0));
+		exit(1);
+	}
+
+	config->wordsFile = getStr(args, 'w', "long.txt");
+	config->solutionsFile = getStr(args, 's', NULL); // set default later, in case wordsFile is changed
+	config->jobs = getULong(args, 'j', 1);
+	config->verbosity = getCount(args, 'v') + 1;
+	config->solution = getStr(args, 's', NULL);
 
 	parseConfigPath(config);
 
@@ -131,17 +130,18 @@ Config* configParse(int argc, char** argv) {
 	if (config->solution)
 		config->solution = strdup(config->solution);
 
+	argsFree(args);
 	return config;
 }
 
 void configFree(Config* config) {
 	// if they're the same pointer, only free one
 	if (config->wordsFile != config->solutionsFile)
-		free(config->solutionsFile);
-	free(config->wordsFile);
+		free((void*)config->solutionsFile);
+	free((void*)config->wordsFile);
 
 	if (config->solution)
-		free(config->solution);
+		free((void*)config->solution);
 
 	for (uint i = 0; i < config->searchEntries; i++) {
 		free(config->searchPath[i]);

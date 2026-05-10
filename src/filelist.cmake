@@ -3,6 +3,7 @@
 
 target_sources(modules PRIVATE
 	"./src/algorithm.c"
+	"./src/argparse.c"
 	"./src/cache.c"
 	"./src/config.c"
 	"./src/fsutils.c"
