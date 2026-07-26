@@ -67,8 +67,13 @@ Pattern parsePattern(const Pattern word, const char* const text) {
 
 Pattern readPattern(const Pattern word, const Config* const config) {
 	// if we're using a predetermined solution to test the algorithm
-	if (config->solution)
+	if (config->solution) {
+		char wordStr[6];
+		wordStr[5] = 0;
+		pattern2str(word, wordStr);
+		printf("Guess: %s\n", wordStr);
 		return simGuess(word, str2pattern(config->solution));
+	}
 
 	bool inputIsValid = false;
 	Pattern out;

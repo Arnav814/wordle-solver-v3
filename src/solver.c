@@ -71,7 +71,12 @@ void solver(const Config* config) {
 		pattern2str(solutions.data[0], solutionStr);
 
 		// if we already guessed the correct word by chance, don't count another word
-		if (strcmp(lastGuess, solutionStr) != 0) iteration++;
+		if (strcmp(lastGuess, solutionStr) != 0) {
+			iteration++;
+			// print the extra guess to make things easier to parse in auto-solve mode
+			if (config->solution) printf("Guess: %s\n", solutionStr);
+		}
+
 		printf("The solution is %s (%i guesses made).\n", solutionStr, iteration);
 	} else {
 		printf("No more possible solutions. Either the actual solution is not in the provided "
